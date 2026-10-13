@@ -171,15 +171,19 @@ Production build, 2026-10-13 (`npm run build`):
 
 | File | Raw | Gzip |
 |---|---|---|
-| `assets/index-*.js` (game + Phaser 3.90) | 1,269.5 KB | 342.9 KB |
+| `assets/index-*.js` (game + Phaser 3.90) | 1,276.9 KB | 345.0 KB |
 | `index.html` | 0.7 KB | 0.5 KB |
 | 3 Latin WOFF2 fonts | 53.8 KB | 53.9 KB |
-| Title ornament WebP | 37.9 KB | 37.8 KB |
+| Theme WebPs (including 71.1 KB optional food icons, not requested at runtime) | 666.2 KB | 664.8 KB |
 | Font license notices | 9.0 KB | 4.0 KB |
 | 6 MP3 SFX (deferred; 2 more under 4 KB are inlined in the JS) | 69.2 KB | (already compressed) |
-| **Total `dist/`** | **1,440.1 KB** | |
+| **Total `dist/`** | **2,075.8 KB** | **1,109.0 KB** |
 
-Measured after typography Step 3 with Node `zlib.gzipSync` (decimal KB).
+Measured after art integration with Node `zlib.gzipSync` (decimal KB; total gzip is the sum
+of individually compressed files). Critical art is 493.7 KB landscape / 489.6 KB portrait;
+the opposite background and audio load deferred. Existing startup fonts are separate.
+See [art integration report](docs/art-integration.md) for mapping, resize logs, preserved
+placeholders, original-asset sizes, screenshots/evidence paths and verification limitations.
 Title: Cinzel Decorative 700. UI/numbers: Baloo 2 400/700. Both SIL OFL 1.1;
 local Latin WOFF2 only. Font details, license links, fallback behavior and
 validation evidence: [docs/typography.md](docs/typography.md).
@@ -190,6 +194,12 @@ startup timeout and late-load refresh. Audio loads after the first screen; spin
 shows "LOADING n%" until it is ready.
 
 ## Performance
+
+Art integration recheck (412 x 915, DPR 2, 4x CPU throttle): actual Phaser rendered-frame
+counts over four seconds averaged **115.2 FPS idle / 91.0 FPS big win**. Big-win p95 was
+15.7 ms, with one 28.1 ms frame. Neither average fell below 55; the slowest individual
+frame did. This desktop-GPU check is not physical Android/iOS validation. The longer
+prototype measurements below predate the finished art.
 
 Measured 2026-10-13 in headless Chrome, with puppeteer driving the dev build. Settings: mobile viewport 412x915 / 915x412 at DPR 2.625 (canvas 1081x2402), **4x CPU throttle** (CDP `Emulation.setCPUThrottlingRate`). Each run was 75 s of auto-play with forced big win, hold & win, free spins and mega win. Frame times came from a `requestAnimationFrame` probe. The display ran at 144 Hz, so an unthrottled baseline is about 144 FPS.
 
@@ -217,7 +227,8 @@ src/gameConfig.ts      client tunables: bets, balance, timings (+ turbo), win ti
 src/math/              paylines, paytable, strips, rng, evaluate, features, round (pure TS)
 src/rgs/               types, RGS interface, MockRGS, force (dev only)
 src/state/             SlotStateMachine
-src/scenes/            BootScene (generated textures, loader), GameScene (wiring)
+src/scenes/            BootScene (critical art, fallback textures), GameScene (wiring, deferred loading)
+src/theme/             Parol Nights texture keys and asset URLs
 src/game/              Reels, Symbol, WinLines, WinPresenter, FeatureOverlay, FreeSpins, HoldAndWin,
                        Hud, Paytable, ErrorModal, SoundManager, fx, DebugPanel (dev only)
 src/utils/             responsive (sx/sy/sd), format, timeline (skippable steps), anticipation, progress, fitText

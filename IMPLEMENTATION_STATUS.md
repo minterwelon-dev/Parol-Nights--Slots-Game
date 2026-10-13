@@ -276,7 +276,7 @@ All 14 suggested items are done (see section 3, Client > Animations). Rules for 
 pooled / no per-frame allocations, turbo shortens but never removes results, money only from the response, verify both orientations.
 
 ### Remaining
-Art integration is authorized and in progress on `feat/parol-assets`.
+Art integration is complete on `feat/parol-assets`; see `docs/art-integration.md`.
 Inventory: all 23 approved WebPs match their manifest (dimensions, bytes, format, alpha).
 Approved size exceptions: H3 448 square; logo 768 x 288. No missing files.
 User approved uniformly scaling the frame and its centered 1500 x 900 window between title and HUD.
@@ -286,7 +286,7 @@ Runtime copies: 320-square symbols and 1280 x 720 / 720 x 1280 backgrounds, gene
 logged in `Assets/theme/parol-nights/runtime/manifest.json`; approved originals are untouched.
 Critical art including round/plaque controls: 493,740 bytes landscape / 489,572 portrait.
 Opposite background and audio are deferred; spin remains gated by existing deferred-ready behavior.
-Relative Vite base supports deployment under a sub-path. Browser verification is in progress.
+Relative Vite base supports deployment under a sub-path. Browser verification passed.
 Layout/animation step complete: frame/window/cell geometry comes from the source dimensions and
 uniform layout scale; symbol images live in pooled containers, with container-only win/landing
 scale animation. Unmasked additive win glows stay beneath the front frame. UI bases retain their
@@ -297,6 +297,17 @@ reports 95.181% RTP. Browser smoke covers portrait/landscape, live rotation, pay
 big win, Free Spins and Hold & Win, returning to Idle without warnings or exceptions.
 4x CPU throttle (412 x 915, DPR 2, desktop Chrome): actual rendered frames averaged 115.2 FPS idle
 and 91.0 FPS during big win; animation p95 15.7 ms / maximum 28.1 ms. Physical mobile remains untested.
+Final verification: production `/parol/` passed in both orientations with 56 successful HTTP
+responses and no runtime warnings/exceptions; debug hooks are absent and only one canvas exists.
+Loading-screen rotation passed. The loader bar now remains above the background and relayouts.
+Nine injected missing textures all use nonblank procedural fallbacks and warn once per key;
+a complete fallback spin returned to Idle without exceptions. Final build, type check, lint and
+existing checks pass. Six viewport geometry checks pass. Original delivered art is unchanged.
+Final dist: 2,075,845 raw / 1,108,958 gzip bytes. Active art across orientations: 595,078 bytes;
+71,106 optional food-icon bytes are emitted but not requested (there is no dish-table consumer).
+Evidence: `_review/art-browser.json`, `art-production.json`, `art-audit.json`, screenshots
+`_review/art-*.png`. Procedural HUD icons, panels, feature boards and effects remain intentionally.
+No unresolved integration questions; separate settings/verify modals do not exist in this client.
 
 Parol Nights assets: Stages 1–4 approved; final delivery complete.
 All 23 exports delivered with manifest, source prompts, attribution, QA and four review sheets.

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { RELAYOUT, THEME } from '../constants';
+import { DEPTH, RELAYOUT, THEME } from '../constants';
 import { Title } from '../game/Title';
 import { Background } from '../game/Background';
 import {
@@ -62,7 +62,7 @@ export class BootScene extends Phaser.Scene {
     super('Boot');
   }
 
-  /** Loading screen + critical title ornament; other art remains generated. */
+  /** Current-orientation art first; fallbacks are generated after loading completes. */
   preload() {
     this.critical = criticalArt(layout.landscape);
     let background: Background | undefined;
@@ -75,10 +75,6 @@ export class BootScene extends Phaser.Scene {
       if (key === ASSETS.landscape.key || key === ASSETS.portrait.key)
         background = new Background(this);
     });
-    const cx = sx(layout.w / 2);
-    const cy = sy(layout.h / 2);
-    const w = sd(560);
-    const h = sd(18);
     const title = new Title(this);
     const placeTitle = () => title.place(layout.w / 2, layout.h / 2 - 220, 1000, 92);
     placeTitle();
@@ -93,8 +89,14 @@ export class BootScene extends Phaser.Scene {
       if (item.url) this.load.image(item.key, item.url);
       else warnMissing(item.key);
     }
-    const bar = this.add.graphics();
+    const bar = this.add.graphics().setDepth(DEPTH.HUD);
+    let progress = 0;
     const draw = (p: number) => {
+      progress = p;
+      const cx = sx(layout.w / 2);
+      const cy = sy(layout.h / 2);
+      const w = sd(560);
+      const h = sd(18);
       bar
         .clear()
         .fillStyle(THEME.panel, 1)
@@ -103,6 +105,9 @@ export class BootScene extends Phaser.Scene {
     };
     draw(0);
     this.load.on(Phaser.Loader.Events.PROGRESS, draw);
+    const placeBar = () => draw(progress);
+    this.game.events.on(RELAYOUT, placeBar);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.off(RELAYOUT, placeBar));
   }
 
   create() {
@@ -173,10 +178,10 @@ export class BootScene extends Phaser.Scene {
           ctx.strokeStyle = '#FFC94A';
           ctx.lineWidth = frame ? 32 : 8;
           ctx.strokeRect(
-            frame ? 60 : 8,
-            frame ? 60 : 8,
-            w - (frame ? 120 : 16),
-            h - (frame ? 120 : 16),
+            frame ? 60 : w * 0.2,
+            frame ? 60 : h * 0.25,
+            frame ? w - 120 : w * 0.6,
+            frame ? h - 120 : h * 0.3,
           );
         } else {
           const g = ctx.createLinearGradient(0, 0, 0, h);

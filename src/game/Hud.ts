@@ -26,6 +26,7 @@ class Button {
   readonly img: Phaser.GameObjects.Image;
   readonly label: Phaser.GameObjects.Text;
   enabled = true;
+  tint = 0xffffff;
 
   constructor(
     scene: Phaser.Scene,
@@ -46,12 +47,15 @@ class Button {
       if (!this.enabled) return;
       press(scene, this.img, this.label);
       onPress();
+      this.img.setTint(0xffe4a0);
     });
+    const release = () => this.img.setTint(this.enabled ? this.tint : 0x888899);
+    this.img.on('pointerup', release).on('pointerout', release);
   }
 
   setEnabled(on: boolean) {
     this.enabled = on;
-    this.img.setAlpha(on ? 1 : OFF_ALPHA);
+    this.img.setAlpha(on ? 1 : OFF_ALPHA).setTint(on ? this.tint : 0x888899);
     this.label.setAlpha(on ? 1 : OFF_ALPHA);
   }
 
@@ -105,7 +109,7 @@ class SpinButton {
   setMode(mode: SpinMode) {
     const live = mode === 'spin' || mode === 'stop';
     const a = live ? 1 : 0.45;
-    this.disc.setAlpha(a);
+    this.disc.setAlpha(a).setTint(live ? (mode === 'stop' ? 0xffe4a0 : 0xffffff) : 0x888899);
     this.arrow.setAlpha(a);
     this.mark.setVisible(mode === 'stop');
     if (mode === 'stop') this.turn.restart();
@@ -251,7 +255,8 @@ export class Hud {
   /** ON: solid gold pill, dark text. OFF: outlined pill, muted text. Always pressable. */
   setTurbo(on: boolean) {
     this.turboOn = on;
-    this.turboBtn.img.setTint(on ? 0xffdf80 : 0xb0b0c8);
+    this.turboBtn.tint = on ? 0xffdf80 : 0xb0b0c8;
+    this.turboBtn.img.setTint(this.turboBtn.tint);
     this.turboBtn.label.setColor(on ? THEME.gold : THEME.muted);
   }
 
