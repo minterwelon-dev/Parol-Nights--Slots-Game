@@ -1,14 +1,16 @@
 import Phaser from 'phaser';
 import { RELAYOUT, THEME } from '../constants';
-import { LOGO_KEY, ornamentUrl, Title } from '../game/Title';
+import { Title } from '../game/Title';
+import { Background } from '../game/Background';
+import { ART as ASSETS, UI, symbolKey, blurKey, criticalArt, warnMissing } from '../theme/parolNights';
+export { UI, symbolKey, blurKey } from '../theme/parolNights';
 import type { SymbolId } from '../rgs/types';
 import { layout, sd, sx, sy } from '../utils/responsive';
 
 /** Source size of generated symbol textures (px). Displayed via setDisplaySize(sd()). */
 export const SYMBOL_TEX = 256;
 
-export const symbolKey = (id: SymbolId) => 'sym_' + id;
-export const blurKey = (id: SymbolId) => 'sym_' + id + '_blur';
+
 
 interface Art {
   bg: [string, string];
@@ -50,12 +52,21 @@ function roundRect(
 }
 
 export class BootScene extends Phaser.Scene {
+  private critical = criticalArt(layout.landscape);
   constructor() {
     super('Boot');
   }
 
   /** Loading screen + critical title ornament; other art remains generated. */
   preload() {
+    this.critical = criticalArt(layout.landscape);
+    let background: Background | undefined;
+    const placeBackground = () => background?.relayout(layout);
+    this.game.events.on(RELAYOUT, placeBackground);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.off(RELAYOUT, placeBackground));
+    this.load.on(Phaser.Loader.Events.FILE_COMPLETE, (key: string) => {
+      if (key === ASSETS.landscape.key || key === ASSETS.portrait.key) background = new Background(this);
+    });
     const cx = sx(layout.w / 2);
     const cy = sy(layout.h / 2);
     const w = sd(560);
@@ -67,7 +78,11 @@ export class BootScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
       this.game.events.off(RELAYOUT, placeTitle),
     );
-    this.load.image(LOGO_KEY, ornamentUrl);
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => warnMissing(file.key));
+    for (const item of this.critical) {
+      if (item.url) this.load.image(item.key, item.url);
+      else warnMissing(item.key);
+    }
     const bar = this.add.graphics();
     const draw = (p: number) => {
       bar
@@ -83,6 +98,7 @@ export class BootScene extends Phaser.Scene {
   create() {
     this.refreshSymbolTextures();
     this.makeUiTextures();
+    this.ensureArtFallbacks(this.critical);
     this.scene.start('Game');
   }
 
@@ -92,6 +108,8 @@ export class BootScene extends Phaser.Scene {
     for (const id in ART) {
       const a = ART[id as SymbolId];
       const key = symbolKey(id as SymbolId);
+      if (this.textures.exists(key) && !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)) continue;
+      if (!this.textures.exists(key)) warnMissing(key);
       const tex = this.textures.exists(key)
         ? (this.textures.get(key) as Phaser.Textures.CanvasTexture)
         : this.textures.createCanvas(key, S, S)!;
@@ -127,12 +145,36 @@ export class BootScene extends Phaser.Scene {
     this.makeBlurTextures();
   }
 
+  /** Only missing textures are generated; delivered art is never painted over. */
+  ensureArtFallbacks(items: readonly { key: string }[]) {
+    for (const { key } of items) {
+      if (this.textures.exists(key)) continue;
+      warnMissing(key);
+      const frame = key === ASSETS.frame.key;
+      const logo = key === ASSETS.logo.key;
+      const w = frame ? 1700 : logo ? 768 : 32;
+      const h = frame ? 1100 : logo ? 288 : 32;
+      this.canvasTex(key, w, h, ctx => {
+        if (frame || logo) {
+          ctx.strokeStyle = '#FFC94A';
+          ctx.lineWidth = frame ? 32 : 8;
+          ctx.strokeRect(frame ? 60 : 8, frame ? 60 : 8, w - (frame ? 120 : 16), h - (frame ? 120 : 16));
+        } else {
+          const g = ctx.createLinearGradient(0, 0, 0, h);
+          g.addColorStop(0, '#0B1033'); g.addColorStop(1, '#231438');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        }
+      });
+    }
+  }
+
   private canvasTex(
     key: string,
     w: number,
     h: number,
     draw: (ctx: CanvasRenderingContext2D) => void,
   ) {
+    if (this.textures.exists(key) && !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)) return;
     const tex = this.textures.exists(key)
       ? (this.textures.get(key) as Phaser.Textures.CanvasTexture)
       : this.textures.createCanvas(key, w, h)!;
@@ -150,7 +192,7 @@ export class BootScene extends Phaser.Scene {
         .getSourceImage() as HTMLCanvasElement;
       this.canvasTex(blurKey(id as SymbolId), S, S, (ctx) => {
         ctx.globalAlpha = 0.17;
-        for (let dy = -18; dy <= 18; dy += 3) ctx.drawImage(src, 0, dy);
+        for (let dy = -18; dy <= 18; dy += 3) ctx.drawImage(src, 0, dy, S, S);
       });
     }
   }
@@ -239,7 +281,7 @@ export class BootScene extends Phaser.Scene {
     // mute toggle: secondary disc with a speaker, sound waves (on) or a cross (off)
     for (const on of [true, false]) {
       this.canvasTex(on ? UI.soundOn : UI.soundOff, 128, 128, (ctx) => {
-        secondaryDisc(ctx);
+        ctx.drawImage(this.textures.get(UI.round).getSourceImage() as HTMLImageElement, 0, 0, 128, 128);
         ctx.fillStyle = ctx.strokeStyle = on ? '#ffd34d' : '#b8916c';
         ctx.beginPath(); // speaker: box + cone
         ctx.moveTo(32, 52);
@@ -281,15 +323,6 @@ export class BootScene extends Phaser.Scene {
       ctx.fillStyle = g;
       roundRect(ctx, 4, 4, 392, 112, 56);
       ctx.fill();
-    });
-    // toggle OFF state: same pill shape as UI.btn, dark with a gold outline
-    this.canvasTex(UI.pillOff, 400, 120, (ctx) => {
-      ctx.fillStyle = '#1f0e09';
-      roundRect(ctx, 5, 5, 390, 110, 55);
-      ctx.fill();
-      ctx.lineWidth = 6;
-      ctx.strokeStyle = '#8a5222';
-      ctx.stroke();
     });
     // winning-cell frame: white so WinLines can tint it per line. Drawn at 0.94 cell, so 11 px / 29 px
     // here match the old sd(8) stroke / sd(22) radius at reference cell size.
@@ -347,20 +380,3 @@ function spinDisc(ctx: CanvasRenderingContext2D) {
   ctx.stroke();
 }
 
-/** Generated UI texture keys. */
-export const UI = {
-  px: 'ui_px',
-  spin: 'ui_spin',
-  spinArrow: 'ui_spin_arrow',
-  stop: 'ui_stop',
-  round: 'ui_round',
-  coin: 'ui_coin',
-  glow: 'ui_glow',
-  rays: 'ui_rays',
-  cellFrame: 'ui_cell_frame',
-  pillOff: 'ui_pill_off',
-  soundOn: 'ui_sound_on',
-  soundOff: 'ui_sound_off',
-  btn: 'ui_btn',
-  panel: 'ui_panel',
-} as const;

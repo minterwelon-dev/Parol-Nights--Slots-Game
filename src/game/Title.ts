@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
-import ornamentUrl from '../../Assets/theme/parol-nights/ui/logo_ornament.webp?url';
+import { ART } from '../theme/parolNights';
 import { DEPTH, THEME } from '../constants';
 import { GAME_TITLE } from '../gameConfig';
 import { fitText } from '../utils/fitText';
 import { sd, sx, sy } from '../utils/responsive';
 
-export const LOGO_KEY = 'logo-ornament';
-export { ornamentUrl };
+export const LOGO_KEY = ART.logo.key;
 
 /** Live title over the approved, text-free banner. Coordinates are reference units. */
 export class Title {

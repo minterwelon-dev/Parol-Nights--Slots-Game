@@ -1,0 +1,134 @@
+[
+  {
+    "source": "symbols/L1.webp",
+    "sourceSha256": "87ab18209c98c23727dac08e27121c67a8502703677196c8b93fc4e03e0b4652",
+    "file": "runtime/symbols/L1.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 19676,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/L2.webp",
+    "sourceSha256": "b579527ac976896c8fd01a4ff89fc8e2cd3dab6ff562e3466427a5a533f095cb",
+    "file": "runtime/symbols/L2.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 17272,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/L3.webp",
+    "sourceSha256": "c72aceff26b0aa79f51a61fce38193d009c2fdc642b6f58bcf93f4a8e0ddcce7",
+    "file": "runtime/symbols/L3.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 14758,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/L4.webp",
+    "sourceSha256": "f56ae1ee3807a3cbbadb9e3397cd4b8366491d23f89f1bea576c7871796c3ed6",
+    "file": "runtime/symbols/L4.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 24218,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/H1.webp",
+    "sourceSha256": "0d4aebd02d6a4933794932f4aa306c0036b4f378674d82c5384ae6a4495bd4a3",
+    "file": "runtime/symbols/H1.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 23254,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/H2.webp",
+    "sourceSha256": "003c49b36132b5dee52659ca73b379a71631adc4f43f8dc7b91860bffd2cd5b5",
+    "file": "runtime/symbols/H2.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 25210,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/H3.webp",
+    "sourceSha256": "b8960c0e5505dcd9dad28351b48c200c5449bdf4fbea07d8c63a32d12f6fba93",
+    "file": "runtime/symbols/H3.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 27804,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/WILD.webp",
+    "sourceSha256": "d4b6c7d58a82994a354ad78a510cac15b37fea8827f9672293b24bfaa58414de",
+    "file": "runtime/symbols/WILD.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 22358,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/SCATTER.webp",
+    "sourceSha256": "720341875a5400cbe89be9ae3f03ba1543f950fe6d1de6a990d7a737ee3d1dd5",
+    "file": "runtime/symbols/SCATTER.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 22264,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "symbols/COIN.webp",
+    "sourceSha256": "c6cba793360ac3f2b0b3776b43ff4186000b7ad5510a52892735a9a1b6eaf94d",
+    "file": "runtime/symbols/COIN.webp",
+    "width": 320,
+    "height": 320,
+    "bytes": 14808,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "bg/bg_landscape.webp",
+    "sourceSha256": "77a5716f679f71a554293122a4c1cb92e17637480623b9fed81916014386b890",
+    "file": "runtime/bg/bg_landscape.webp",
+    "width": 1280,
+    "height": 720,
+    "bytes": 105506,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  },
+  {
+    "source": "bg/bg_portrait.webp",
+    "sourceSha256": "7d541ca9f0c860fc25380d6b44ae6328e7900ea285a937f7396896cc20bd0bcf",
+    "file": "runtime/bg/bg_portrait.webp",
+    "width": 720,
+    "height": 1280,
+    "bytes": 101338,
+    "quality": 80,
+    "method": 6,
+    "operation": "Lanczos resize only"
+  }
+]

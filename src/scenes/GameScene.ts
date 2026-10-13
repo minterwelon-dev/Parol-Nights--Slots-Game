@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { SFX } from '../assets';
+import { Background } from '../game/Background';
+import { deferredArt, warnMissing } from '../theme/parolNights';
+import { BootScene } from './BootScene';
 import { RELAYOUT } from '../constants';
 import { ErrorModal } from '../game/ErrorModal';
 import { FreeSpins } from '../game/FreeSpins';
@@ -23,6 +26,7 @@ const MAX_DT = 50;
 
 /** Wiring only: creates modules, talks to the RGS, drives the state machine. */
 export class GameScene extends Phaser.Scene {
+  private background?: Background;
   private fsm = new SlotStateMachine();
   private reels?: Reels;
   private winLines?: WinLines;
@@ -51,6 +55,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   async create() {
+    this.background = new Background(this);
     this.game.events.on(RELAYOUT, this.relayout, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
       this.game.events.off(RELAYOUT, this.relayout, this),
@@ -113,9 +118,19 @@ export class GameScene extends Phaser.Scene {
 
   /** Deferred manifest: fetched while the player sits on Idle. A failed file never blocks play. */
   private loadDeferred() {
+    const art = deferredArt(this.textures.exists('bg_landscape'));
+    for (const item of art) {
+      if (item.url) this.load.image(item.key, item.url);
+      else warnMissing(item.key);
+    }
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
+      if (art.some(item => item.key === file.key)) warnMissing(file.key);
+    });
     for (const key in SFX) this.load.audio(key, SFX[key as keyof typeof SFX]);
     this.load.on(Phaser.Loader.Events.PROGRESS, (p: number) => this.hud.setLoading(p));
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      (this.scene.get('Boot') as BootScene).ensureArtFallbacks(art);
+      this.background?.relayout(layout);
       this.ready = true;
       this.sfx.init();
       if (this.fsm.state === 'Idle') this.hud.setSpinMode(this.idleSpinMode());
@@ -297,6 +312,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private relayout(l: Layout) {
+    this.background?.relayout(l);
     this.reels?.relayout(l);
     this.hud?.relayout(l);
     this.errorModal?.relayout(l);
