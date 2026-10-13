@@ -6,7 +6,7 @@ It records what is built, every decision that deviates from or extends the brief
 **Keep it current:** at the end of every completed step, update the relevant sections (status, decisions,
 file map, known issues, next steps) and the "Last updated" line. Phase checkboxes also live in `PROJECT_BRIEF.md`; tick them there too.
 
-_Last updated: 2026-10-13 — Phase 5 delivery: gameplay video recorded, GitHub Pages workflow added; waiting for the repo URL to push and deploy._
+_Last updated: 2026-10-13 — Phase 5 complete: live on GitHub Pages, gameplay video committed; Ship Checklist fully ticked. Optional next: ANIMATION_SPEC Step 9 / Phase 4 stretch._
 
 ---
 
@@ -567,4 +567,9 @@ fast-forward intros / summaries), then holdAndWin armed and played. GitHub Pages
 (39 MB of local QA evidence) is git-ignored at the user's choice; docs still reference it locally. Branch plan: commit on
 feat/parol-assets, create `main` at the same commit, push both once the user creates the public repo.
 Remaining after that: the optional Phase 4 stretch items in `SKIPPED.md` and the optional ANIMATION_SPEC Step 9.
+Deployed 2026-10-13: repo https://github.com/minterwelon-dev/Parol-Nights--Slots-Game (branches `main` and
+`feat/parol-assets`, same commit). The first workflow run failed to parse (invalid YAML escape in the debug gate); fixed
+with a block-scalar `grep -E` step (commit "fix(ci)"). The run on `main` then passed every step and deployed:
+https://minterwelon-dev.github.io/Parol-Nights--Slots-Game/. Live check (headless Chrome, both orientations, production): 66 successful responses, no 4xx/5xx, one canvas,
+no debug hooks, no warnings or errors, three spins played.
 Keep the README's bundle size and performance tables current when the client changes.

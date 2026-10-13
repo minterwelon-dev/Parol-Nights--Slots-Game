@@ -188,7 +188,7 @@ Keep project-authored error handling meaningful: visible fallback UI, `console.w
 - [x] No `console.error` in production output
 - [x] Production bundle contains no debug panel or forced-outcome code
 - [x] Paytable modal generated from `math/paytable.ts`
-- [ ] README, simulation report, live demo link, gameplay video present _(README, report and video done; demo link after the first GitHub Pages deploy)_
+- [x] README, simulation report, live demo link, gameplay video present
 
 ## Pitfalls
 | Issue | Fix |

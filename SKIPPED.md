@@ -14,15 +14,8 @@ _Last updated: 2026-10-13_
 
 ## Phase 5 — delivery
 
-| Item | Status | What it would take |
-|---|---|---|
-| Deployed demo (GitHub Pages) | In progress | `.github/workflows/pages.yml` builds, runs the self-checks and the debug-code gate, and publishes `dist/` on pushes to `main`. Needs the public GitHub repo URL, a push, and Pages set to "GitHub Actions" in the repo settings. Then add the link to the README and tick the Ship Checklist. |
-
-The gameplay video is done: `docs/media/gameplay.mp4`.
-
-## Ship Checklist items left open
-
-- **Live demo link** in the README: needs the first Pages deploy.
+Done: live demo at https://minterwelon-dev.github.io/Parol-Nights--Slots-Game/ (GitHub Pages workflow) and the gameplay video `docs/media/gameplay.mp4`.
+No Ship Checklist items are open.
 
 ## Smaller gaps (not separate brief items)
 

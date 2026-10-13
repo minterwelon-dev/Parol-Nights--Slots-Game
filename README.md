@@ -4,7 +4,7 @@ A 5x3, 40-line HTML5 slot built the way a regulated-market studio builds a clien
 
 Phaser 3.90 · TypeScript (strict) · Vite 8 · desktop and mobile (portrait and landscape, live rotation).
 
-- **Live demo:** GitHub Pages, deployed by [.github/workflows/pages.yml](.github/workflows/pages.yml) on every push to `main` (link added after the first deploy)
+- **Live demo:** [https://minterwelon-dev.github.io/Parol-Nights--Slots-Game/](https://minterwelon-dev.github.io/Parol-Nights--Slots-Game/) (GitHub Pages, deployed by [.github/workflows/pages.yml](.github/workflows/pages.yml) on every push to `main`)
 - **Gameplay video:** [docs/media/gameplay.mp4](docs/media/gameplay.mp4) (39 s, 1280x720, silent): base game, the debug panel forcing Free Spins and Hold & Win, both features played through
 
 ## Run it
@@ -232,7 +232,7 @@ Caveats: the GPU was a desktop RTX 3060, so the throttle only simulates a slow C
 
 ## Ship checklist status
 
-See the Ship Checklist in [AGENTS.md](AGENTS.md). Everything is ticked except the live demo link, which waits for the first GitHub Pages deploy.
+See the Ship Checklist in [AGENTS.md](AGENTS.md). Every item is ticked.
 
 ## Project layout
 
