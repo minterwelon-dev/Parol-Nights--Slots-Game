@@ -1,0 +1,89 @@
+[
+  {
+    "id": "L2",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Round orb-shaped parol with sapphire blue panels and gold ribs, one small tassel at the bottom. Simple, clean design. The orb must be a broad circular shape, not a star; no filigree. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Match the simple L1 reference level of detail; do not copy H1 filigree.",
+    "references": [
+      "source/L1.png"
+    ],
+    "attempts": 1
+  },
+  {
+    "id": "L3",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Diamond (kite) shaped parol with amethyst purple panels, gold bamboo frame, tassels ONLY at the bottom corner. Simple clean design. Four straight outer frame edges form a CONVEX diamond kite silhouette, like a rotated square with no concave indentations. Exactly four body corners: top, left, right, bottom. Top/left/right corners have no dangling decoration, no tassels, no finials. One short golden tassel cluster suspended from bottom corner only. Simple inner pane divisions and warm inner light, no filigree. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Match L1 style only; do not copy its star shape or corner tassel placement.",
+    "references": [
+      "source/L1.png"
+    ],
+    "attempts": 2,
+    "rejectedAttempts": [
+      {
+        "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Diamond (kite) shaped parol with amethyst purple panels, gold frame, tassels at the bottom corner. Simple, clean design. The outer lantern body must be a four-corner diamond, not a five-point star; no filigree. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Match the simple L1 reference level of detail; do not copy H1 filigree.",
+        "reason": "Concave diamond outline and extra top/side tassels; regenerated with convex kite and bottom-only tassel constraints."
+      }
+    ]
+  },
+  {
+    "id": "L4",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Eight-pointed snowflake-like parol with tangerine orange panels and a gold frame. Simple, clean design. Exactly eight clear points in an alternating snowflake/burst silhouette; avoid five-point star and dense ornament. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Match the simple L1 reference level of detail; do not copy H1 filigree.",
+    "references": [
+      "source/L1.png"
+    ],
+    "attempts": 1
+  },
+  {
+    "id": "H2",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Hexagonal capiz-shell parol with translucent pearl-white shell panes, teal inner glow, silver-gold frame, delicate beaded tassels. The lantern body has a clear six-sided hexagonal perimeter; rich shell texture and ornate premium detailing, still readable small. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Match H1 premium richness, but hexagonal body and translucent pearl/teal shell panels rather than a red star.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1
+  },
+  {
+    "id": "H3",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Grand layered giant parol with several nested gold star layers, rainbow-colored inner lights, sunburst rays, extra tassels. The richest and most spectacular symbol. Strong layered starburst silhouette, visibly richer than the ornate red H1 reference. Keep large clear layers rather than many tiny motifs. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Use H1 as premium material/style reference, but produce a distinct broad multi-layer rainbow grand parol: concentric nested star layers plus sunburst rays and ornate tassels, not merely a recolored H1.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1
+  },
+  {
+    "id": "WILD",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Radiant white-gold sunburst lantern, blazing pearl-white core with golden rays and sparkles, the brightest symbol. Broad round luminous core with numerous gold radial rays. Nonreligious decorative lantern; no halo surrounding a person, no star-shaped core, no tassels. Keep sparkle highlights attached to the rays rather than detached particles. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Use reference art only for outline, lighting and gold illustration treatment. Round pearl-white luminous core with a clean gold sunburst perimeter, clearly different from the colored star lanterns.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1
+  },
+  {
+    "id": "SCATTER",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). A Filipino caroling tambourine (pandereta) made of flattened bottle caps threaded on a round wooden hoop, with a festive red-and-gold ribbon, shiny metallic caps, warm glow. Large visible transparent central opening and a clearly circular wood hoop with flattened metallic bottle-cap discs distributed around its circumference. Not a drum with a membrane. Front view, symmetrical hoop with a centered red-and-gold ribbon bow at bottom. No star lantern. Single isolated icon on a square canvas, entire subject and tassels fully inside canvas, generous clear margins, longest side about 85% of canvas. Soft top-front light and warm internal light; match approved reference outline weight, gold material and illustration polish. Readable at 96x96 and distinguishable by shape/detail in greyscale. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, tangerine #FF7A1A, pearl #FFF6E0. No brands, existing characters or existing slot art. Use case: stylized-concept; asset type: transparent game symbol. Input images are approved STYLE REFERENCES ONLY, not edit targets: create only the requested new symbol, never include reference icons or a contact sheet. Here the subject is a musical caroling instrument, not a lantern: NO cellophane panes and NO star inside central hole. Keep visible corrugated/crimped bottle-cap rims and flat metallic caps, not generic tambourine paired jingle slots. Wood hoop is smooth brown/gold wood; ribbon is red with gold edges. Use references only for illustration style and light.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1
+  }
+]

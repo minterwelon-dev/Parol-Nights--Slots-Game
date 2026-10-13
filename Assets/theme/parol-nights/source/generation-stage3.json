@@ -1,0 +1,120 @@
+[
+  {
+    "id": "bg_landscape",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. OPAQUE BACKGROUND, wide 16:9 composition designed for final 1920x1080. Wide night-time Filipino neighborhood street at Christmas. Strings of glowing colorful parol lanterns and bunting overhead, soft bokeh lights, deep navy starry sky, simple house silhouettes at the far left and right edges. Lanterns and bunting concentrated in the top quarter and side borders. The large center area, roughly central 70% width and 65% height, must be much darker, calm and LOW DETAIL so reels stay readable. Ground/street below center is subdued navy with no bright central vanishing-point highlight. No people, no vehicles, no signage, no foreground objects obstructing center. Fully opaque image fills the entire rectangular canvas.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1,
+    "transparentBackground": false,
+    "key": null
+  },
+  {
+    "id": "bg_portrait",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. OPAQUE BACKGROUND, tall 9:16 composition designed for final 1080x1920. Same night-time Filipino neighborhood at Christmas as landscape reference: deep navy starry sky, simple house silhouettes at outer sides, soft bokeh, strings of colorful glowing parol lanterns and festive bunting concentrated in TOP QUARTER with a few accents near side borders. Large central area from about 25% to 80% height is calm, DARK NAVY and low in detail for a slot reel overlay. No bright street/path leading through center; darker subdued lower street area. Match landscape neighborhood palette and illustration style, but compose vertically rather than cropping a wide scene. No people, vehicles, signage or foreground clutter. Fully opaque edge-to-edge canvas. The supplied landscape image is an environment/style reference, recompose its scene vertically; keep central large quiet area.",
+    "references": [
+      "source/bg_landscape.png",
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1,
+    "transparentBackground": false,
+    "key": null
+  },
+  {
+    "id": "reel_frame",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. REEL FRAME ONLY, full front view on perfectly flat uniform pure MAGENTA #FF00FF background, same magenta also filling the large center opening. Landscape 17:11 canvas for final1700x1100. Thin glossy gold bamboo rectangle pushed to outer perimeter: rails around45px from each outer edge, about25px thick. Tiny lit capiz five-point star ornaments at each of the four corners, each about72x72pixels within the outer100px bands. Tiny warm glowing diamond-shaped parol lights along each rail; their LIGHT is contained INSIDE the fixtures only. ABSOLUTELY NO diffuse exterior glow, bloom, haze, shadow, aura, speckles or scattered particles. Clean precise thin navy outer outline against magenta. Central clear window x100..1600 y100..1000 must contain only solid magenta; no decorations intruding. Entire outer outline must remain fully within canvas with small margins, no cropped ornaments. Source reference is style only: keep gold bamboo material and corner star colors, remove ALL blurry light glow patches. Background and center must be a completely flat key color, no gradient, no vignette or texture; no magenta inside subject. No text or extra objects. Elegant understated thin frame suitable for WebP size cap.",
+    "references": [
+      "source/reel_frame-attempt2.png (style only)"
+    ],
+    "attempts": 3,
+    "transparentBackground": false,
+    "key": "FF00FF",
+    "rejectedAttempts": [
+      {
+        "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT REEL FRAME. Front view, centered, symmetrical, ornate rectangular frame of bamboo and gold, small glowing parol lights along edges, star-lantern ornaments in four corners. Composition for final 1700x1100 canvas (aspect ratio 17:11); use a landscape canvas with that proportion. Entire outer border including corner ornaments must fit fully within canvas with small transparent margins, no cropping. A very large clean empty TRANSPARENT rectangular center. Design around an inner window of 1500x900 centered, only 100px bands available on each side of final canvas. All substantive bamboo border, lights and corner ornaments must remain in those perimeter bands; no tassels or decorative elements protruding into the center opening. Thin elegant bamboo/gold rails, corners connected neatly, tiny capiz star lanterns at each corner. Background and central hole both native transparent alpha, no drawn checkerboard, no scene, no ground, no cast shadow. Generate ONLY this frame.",
+        "reason": "Large corners and inset rails would be clipped by required 1500x900 window."
+      },
+      {
+        "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT REEL FRAME asset, landscape 17:11 proportions, final canvas 1700x1100. Very narrow perimeter design. Required geometry: completely blank transparent central rectangle from x=100 to1600 and y=100 to1000. EVERY opaque decoration must be OUTSIDE that rectangle. Main top/bottom bamboo rails centered at y=45 and y=1055 with thickness30px; main left/right rails centered at x=45 and x=1655 with thickness30px. Four SMALL star parol corner ornaments only 72x72px centered at (50,50), (1650,50), (50,1050), (1650,1050). This means tiny corner stars, not large icons. Tiny warm parol lights attached to rails, entire light shapes fit inside the 100px border bands. No ornate filigree spreading inward, no leaves, no large corner medallions, no hanging tassels. Continuous elegant rectangular gold/bamboo outline, soft top-front light, tasteful warm glow kept close to rail. Outer art fully visible with small margins; no cropped subject. Frame and empty middle both native transparency. No background, text, icons, people, cast shadows or scene. Prior frame shown as STYLE REFERENCE ONLY: retain its gold bamboo technique, but substantially shrink corners and push all four rails to the far perimeter to respect the exact inner clear window. The huge central transparent window is about88%canvaswidth and82%canvasheight.",
+        "reason": "Diffuse alpha glows exceeded 120 KB cap even at quality70; regenerated on flat magenta with light contained inside fixtures."
+      }
+    ]
+  },
+  {
+    "id": "spin_button",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT UI BUTTON, square composition for final 384x384. One perfectly round glowing star-orb button base, warm pearl/amber light and a glossy gold rim. Round smooth orb center has only warm subtle radial gradient, NO star emblem, arrows, icon, glyph, text, numbers or other central motif. The star-orb feeling comes from warm luminous light, not a drawn star shape. Clean circular silhouette, no rays, no tassels, no extra objects. Front view, centered with small transparent padding, no cast shadow, no ground. Native alpha.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1,
+    "transparentBackground": true,
+    "key": null
+  },
+  {
+    "id": "button_round",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT UI BUTTON, square composition for final 256x256. One perfectly round gold bamboo-rimmed button base, clean segmented bamboo/gold rim, neutral DARK BLUE interior intended for code tinting. Smooth uncluttered blue fill with subtle glossy gradient only, no icon, text, numbers, stars, symbols, lights or extra objects. Front view, centered with small transparent padding, no cast shadow, no ground. Native alpha.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1,
+    "transparentBackground": true,
+    "key": null
+  },
+  {
+    "id": "button_plaque",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. UI PLAQUE ONLY, wide 8:3 horizontal canvas. One wide rounded rectangular bamboo-gold plaque with dark navy BLUE blank interior. Straight horizontal top/bottom rails, softly rounded ends, simple polished border, no text or icons or ornament. Front view. The object fills about94%width and85%height, whole object visible. BACKGROUND MUST BE PERFECTLY FLAT PURE MAGENTA #FF00FF, uniform at every point outside the plaque; no gradients, no shadows, no glow, no brown haze, no vignette or texture anywhere on background. Magenta must not appear inside subject. Crisp thin navy outer outline separates plaque from magenta. Soft top-front glossy lighting on the plaque itself ONLY. References are solely gold bamboo/style references, do not replicate star lantern shapes. This is chroma-key source art, do not draw any checkerboard and do not include a scene.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 3,
+    "transparentBackground": false,
+    "key": "FF00FF",
+    "rejectedAttempts": [
+      {
+        "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT UI PLAQUE, wide landscape composition for final 512x192 (aspect ratio 8:3). Rounded rectangular plaque with bamboo-gold border and neutral dark navy interior, smooth low-detail fill intended for code tinting. Wide usable empty middle and rounded corners, uniform border thickness, restrained glossy top highlights. No text, icon, ornaments or central emblem. Front view, centered with minimal clear outer padding; horizontal long sides straight. No cast shadow, no scene. Native alpha. Entire elongated rectangle visible; not a square image containing a narrow tiny plaque.",
+        "reason": "Native-alpha output retained broad brown exterior haze."
+      },
+      {
+        "prompt": "Edit this UI plaque asset only: remove ALL brown/gold haze, diffuse glow, cast shadow and background outside the rounded rectangular bamboo-gold plaque. The exterior must be completely transparent native alpha immediately beyond the crisp thin navy outline. Keep the plaque itself, gold bamboo border, neutral dark-blue EMPTY interior, material, front-view symmetry, palette and light direction unchanged. No text or icon. Keep the whole plaque visible with clear margins on a wide 8:3 landscape canvas. Do not add decorative objects. This is a precise background-extraction edit, not a new scene.",
+        "reason": "Background-extraction edit retained exterior haze; switched to flat magenta key."
+      }
+    ]
+  },
+  {
+    "id": "logo_ornament",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game art in the approved Parol Nights stylized vector-illustration look: soft gradients, subtle glossy highlights, clean thin dark-navy outlines, soft top-front light, warm internal lantern glow, gold bamboo and capiz/cellophane materials. Filipino Christmas parol theme. Palette guide: navy #0B1033, indigo #1B1F5E, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, sapphire #2F6FED, amethyst #8E44AD, pearl #FFF6E0. No text, letters, numbers, logos, watermarks, brands, people, faces, hands, religious imagery, crosses, nativity, saints or existing characters. Do not imitate an existing slot game. Input images are approved STYLE REFERENCES only; do not place the supplied icons as foreground subjects or create a contact sheet. Use case: stylized-concept; asset type: game environment or UI. TRANSPARENT UI BANNER, wide horizontal composition for final 1024x384 (aspect ratio 8:3). Decorative red-and-gold ribbon banner with small festive parol star lantern ornaments clustered at both far ends. Broad EMPTY CENTER region on the ribbon, neutral dark navy interior panel where title text will later be drawn in code. Keep central 65% of width clear of lanterns, tassels, filigree, sparkles or motifs. Rich but restrained bamboo-gold edging and curved ribbon tails at ends, symmetrical front view. No text, letters, numbers, logo, icon or brand anywhere. All ornaments fully visible, no cropped tassels. Native transparent background, no cast shadow, no scene. IMPORTANT: outside the ribbon and attached ornaments must be fully clear native alpha; no colored background field, outer glow haze or diffuse drop shadow. Center panel is completely unlettered and has no motifs.",
+    "references": [
+      "source/L1.png",
+      "source/H1.png"
+    ],
+    "attempts": 1,
+    "transparentBackground": true,
+    "key": null
+  }
+]

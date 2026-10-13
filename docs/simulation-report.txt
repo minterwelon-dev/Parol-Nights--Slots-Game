@@ -1,0 +1,19 @@
+Parol Nights - simulation report
+spins 1000000  seed 42  bet 400  cap 5000x
+
+RTP                95.181%   (95% CI +/- 1.17%)
+  base game        61.541%
+  free spins       18.852%
+  hold & win       14.787%
+
+hit frequency    34.58%  (1 in 2.9)
+volatility (SD)  5.99x bet
+max win          1129.0x  capped 0 (never)
+
+free spins       1 in 188.7  avg 35.6x  avg spins 10.3  retriggers 223
+hold & win       1 in 250.9  avg 37.1x  grand 15 (1 in 66666.7)
+jackpot coins    mini 266  minor 106  major 30
+
+big   (>=15x)    1 in 144.7
+mega  (>=50x)    1 in 684.9
+epic  (>=100x)   1 in 4444.4

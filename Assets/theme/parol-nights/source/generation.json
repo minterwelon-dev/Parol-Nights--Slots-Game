@@ -1,0 +1,29 @@
+[
+  {
+    "id": "L1",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Five-pointed star parol with emerald green panels, gold bamboo frame, short golden tassels at the tips. Simple, clean design. Single isolated icon on a square canvas, whole subject including tassels fully visible with comfortable margins, longest side about 85% of canvas. Soft top-front light and warm internal light, crisp thin navy contours, clean readable at 96x96. Palette: navy #0B1033, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, pearl #FFF6E0. No brand elements, no existing game art, no detached decorative objects. Use case: stylized-concept; asset type: transparent game symbol.",
+    "reference": null,
+    "attempts": 1
+  },
+  {
+    "id": "H1",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). Ornate five-pointed star parol, deep red panels with intricate gold filigree, long flowing gold tassels, rich warm glow. More detailed than the low symbols. Single isolated icon on a square canvas, whole subject including tassels fully visible with comfortable margins, longest side about 85% of canvas. Soft top-front light and warm internal light, crisp thin navy contours, clean readable at 96x96. Palette: navy #0B1033, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, pearl #FFF6E0. No brand elements, no existing game art, no detached decorative objects. Use case: stylized-concept; asset type: transparent game symbol. Input image is a style reference only: match its illustration technique, gold bamboo material, lighting and outline weight; generate a new ornate RED high-value star, with more filigree and noticeably longer tassels than the reference emerald low-value star. Only the one new red symbol in output.",
+    "reference": "source/L1.png",
+    "attempts": 1
+  },
+  {
+    "id": "COIN",
+    "date": "2026-10-13",
+    "tool": "image_gen.imagegen (built-in)",
+    "model": "Not exposed by the tool; not inferred",
+    "prompt": "Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). A red aguinaldo gift envelope with a gold ornamental border and a golden coin partly emerging from the top. No text on the envelope. Front-on envelope silhouette; the coin has only simple non-text ornament, no face or lettering. Single isolated icon on a square canvas, whole subject including tassels fully visible with comfortable margins, longest side about 85% of canvas. Soft top-front light and warm internal light, crisp thin navy contours, clean readable at 96x96. Palette: navy #0B1033, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, pearl #FFF6E0. No brand elements, no existing game art, no detached decorative objects. Use case: stylized-concept; asset type: transparent game symbol. Input image is a style reference only: match the illustration technique, glossy gold material, red/gold palette and thin navy outline; change subject entirely to one festive red gift envelope with a gold ornamental border and a golden coin partly emerging from the top. Envelope must have strong rectangular silhouette. No star lantern and no tassels on this envelope. No monetary numbers, letters, text or face on coin.",
+    "reference": "source/L1.png",
+    "attempts": 1
+  }
+]

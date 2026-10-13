@@ -1,0 +1,209 @@
+[
+  {
+    "id": "L1",
+    "file": "symbols/L1.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 36080,
+    "role": "symbol"
+  },
+  {
+    "id": "L2",
+    "file": "symbols/L2.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 32322,
+    "role": "symbol"
+  },
+  {
+    "id": "L3",
+    "file": "symbols/L3.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 26636,
+    "role": "symbol"
+  },
+  {
+    "id": "L4",
+    "file": "symbols/L4.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 43544,
+    "role": "symbol"
+  },
+  {
+    "id": "H1",
+    "file": "symbols/H1.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 43518,
+    "role": "symbol"
+  },
+  {
+    "id": "H2",
+    "file": "symbols/H2.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 44562,
+    "role": "symbol"
+  },
+  {
+    "id": "H3",
+    "file": "symbols/H3.webp",
+    "width": 448,
+    "height": 448,
+    "hasAlpha": true,
+    "bytes": 44496,
+    "role": "symbol"
+  },
+  {
+    "id": "WILD",
+    "file": "symbols/WILD.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 41192,
+    "role": "symbol"
+  },
+  {
+    "id": "SCATTER",
+    "file": "symbols/SCATTER.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 39586,
+    "role": "symbol"
+  },
+  {
+    "id": "COIN",
+    "file": "symbols/COIN.webp",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bytes": 27228,
+    "role": "symbol"
+  },
+  {
+    "id": "bg_landscape",
+    "file": "bg/bg_landscape.webp",
+    "width": 1920,
+    "height": 1080,
+    "hasAlpha": false,
+    "bytes": 193256,
+    "role": "background"
+  },
+  {
+    "id": "bg_portrait",
+    "file": "bg/bg_portrait.webp",
+    "width": 1080,
+    "height": 1920,
+    "hasAlpha": false,
+    "bytes": 189270,
+    "role": "background"
+  },
+  {
+    "id": "reel_frame",
+    "file": "frame/reel_frame.webp",
+    "width": 1700,
+    "height": 1100,
+    "hasAlpha": true,
+    "bytes": 86306,
+    "role": "frame"
+  },
+  {
+    "id": "spin_button",
+    "file": "ui/spin_button.webp",
+    "width": 384,
+    "height": 384,
+    "hasAlpha": true,
+    "bytes": 28900,
+    "role": "ui"
+  },
+  {
+    "id": "button_round",
+    "file": "ui/button_round.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 13668,
+    "role": "ui"
+  },
+  {
+    "id": "button_plaque",
+    "file": "ui/button_plaque.webp",
+    "width": 512,
+    "height": 192,
+    "hasAlpha": true,
+    "bytes": 9884,
+    "role": "ui"
+  },
+  {
+    "id": "logo_ornament",
+    "file": "ui/logo_ornament.webp",
+    "width": 768,
+    "height": 288,
+    "hasAlpha": true,
+    "bytes": 37854,
+    "role": "ui"
+  },
+  {
+    "id": "queso_de_bola",
+    "file": "icons/queso_de_bola.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 9286,
+    "role": "icon"
+  },
+  {
+    "id": "hamon",
+    "file": "icons/hamon.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 11818,
+    "role": "icon"
+  },
+  {
+    "id": "sweet_spaghetti",
+    "file": "icons/sweet_spaghetti.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 11900,
+    "role": "icon"
+  },
+  {
+    "id": "fruit_salad",
+    "file": "icons/fruit_salad.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 11810,
+    "role": "icon"
+  },
+  {
+    "id": "bibingka",
+    "file": "icons/bibingka.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 12974,
+    "role": "icon"
+  },
+  {
+    "id": "puto_bumbong",
+    "file": "icons/puto_bumbong.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 13318,
+    "role": "icon"
+  }
+]

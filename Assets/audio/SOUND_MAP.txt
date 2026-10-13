@@ -1,0 +1,70 @@
+Parol Nights - SOUND MAP
+=======================
+
+Reference for replacing the placeholder audio with real assets.
+All current files are synthesized placeholders (ffmpeg), mono MP3, 96 kbps, 44.1 kHz.
+
+
+HOW TO SWAP IN REAL AUDIO
+-------------------------
+1. Export each sound as MP3, 96 kbps (mono is fine for SFX).
+2. Overwrite the file in Assets/audio/ using the SAME file name.
+   That's it: keys, triggers and code stay unchanged.
+3. To rename a file or add a new sound, edit src/assets.ts (the SFX manifest)
+   and add a volume entry in src/game/SoundManager.ts (VOLUME map).
+4. Re-run `npm run build` and check the hashed files under dist/assets/.
+
+Notes
+- Sounds are created once and replayed; playing a sound again restarts it,
+  so keep one-shots short (fast repeats, e.g. reel stops and coins, cut the previous one).
+- Nothing plays before the first tap / key press, while muted, or while the tab is hidden.
+- Files under 4 KB are inlined into the JS bundle by Vite; larger ones ship as separate files.
+- Audio is a deferred asset: spin shows "LOADING n%" until all files are loaded.
+  A file that fails to load is skipped; the game stays playable.
+
+
+SOUND LIST
+----------
+
+Key       File          Placeholder   Volume  Trigger (when it plays)
+--------  ------------  ------------  ------  ---------------------------------------------------
+spin      spin.mp3      0.35 s        0.45    Reels start spinning: every base spin, every free
+                                              spin, and a retry after a connection error.
+stop      stop.mp3      0.16 s        0.60    Each reel finishes landing (5 times per spin, staggered).
+                                              Also stops the "tease" sound.
+tease     tease.mp3     1.3 s         0.50    Anticipation: a reel starts glowing because 2+ SCATTER
+                                              (or 4+ COIN in the base game) already landed.
+                                              Cut off when that reel lands. Can play on several
+                                              reels in a row.
+win       win.mp3       0.6 s         0.70    A win below the big-win tier starts its count-up
+                                              (base game or a single free spin).
+bigwin    bigwin.mp3    1.6 s         0.80    A win of 15x bet or more opens the BIG / MEGA / EPIC
+                                              overlay; also plays when the Free Spins or Hold & Win
+                                              summary opens.
+feature   feature.mp3   1.1 s         0.70    Free Spins or Hold & Win intro overlay appears
+                                              (also on a resumed feature after refresh).
+coin      coin.mp3      0.4 s         0.60    A coin appears on the Hold & Win board (initial coins,
+                                              each new coin in a respin, board rebuild on resume).
+click     click.mp3     0.06 s        0.50    Bet - / +, TURBO toggle, sound toggle (when unmuting).
+
+
+WHERE IT IS WIRED (code)
+------------------------
+src/assets.ts                 SFX manifest: key -> file URL
+src/game/SoundManager.ts      gating, mute, hidden-tab suspend, VOLUME map, play/stop
+src/scenes/GameScene.ts       maps game events to sounds:
+                                reels.hooks.spin / land / tease -> spin / stop / tease
+                                presenter.onWin(big)            -> win / bigwin
+                                holdAndWin.onCoin               -> coin
+                                feature start                   -> feature
+                                feature summary                 -> bigwin
+                                HUD buttons                     -> click
+
+
+IDEAS FOR THE REAL SET (not wired yet)
+--------------------------------------
+- Separate tier stings for BIG / MEGA / EPIC (today one "bigwin" covers all three).
+- Distinct jackpot coin sound (MINI / MINOR / MAJOR) and a GRAND fanfare.
+- Background music loops for base game and features (would need a music channel
+  with its own volume and crossfade in SoundManager).
+- Free spins retrigger sting ("+5 FREE SPINS" banner).
