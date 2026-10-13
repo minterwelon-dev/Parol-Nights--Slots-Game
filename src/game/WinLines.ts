@@ -8,6 +8,9 @@ import { UI } from '../scenes/BootScene';
 import { formatMoney } from '../utils/format';
 import { cellX, cellY, layout, sd } from '../utils/responsive';
 import type { Reels } from './Reels';
+import { ANIM_EVENTS, type AnimationService } from './animation/AnimationService';
+
+const LINE = gameConfig.anim.line;
 
 const COLORS = [0xffd34d, 0x4dd2ff, 0xff6b8b, 0x8bff6b, 0xc58bff, 0xff9f43, 0x43ffd1, 0xff43c8];
 const ALL_COLOR = 0xffd34d;
@@ -37,6 +40,7 @@ export class WinLines {
   constructor(
     scene: Phaser.Scene,
     private reels: Reels,
+    private anim: AnimationService,
   ) {
     for (let i = 0; i < REELS * ROWS; i++) {
       this.frames.push(scene.add.image(0, 0, UI.cellFrame).setVisible(false));
@@ -47,7 +51,7 @@ export class WinLines {
       .text(0, 0, '', {
         fontFamily: THEME.fonts.numeric,
         color: '#fff6d0',
-        stroke: '#3a1500',
+        stroke: THEME.stroke,
       })
       .setOrigin(0.5)
       .setDepth(DEPTH.LINE_WINS)
@@ -55,7 +59,7 @@ export class WinLines {
     this.pulse = scene.tweens.add({
       targets: this.cells,
       alpha: 0.35,
-      duration: 380,
+      duration: gameConfig.anim.timings.framePulseMs,
       yoyo: true,
       repeat: -1,
       paused: true,
@@ -64,14 +68,14 @@ export class WinLines {
     this.revealTween = scene.tweens.add({
       targets: this.reveal,
       p: { from: 0, to: 1 },
-      duration: gameConfig.win.lineDrawMs,
+      duration: LINE.drawMs,
       ease: 'Sine.easeOut',
       paused: true,
       persist: true,
       onUpdate: () => this.drawLines(),
     });
     this.cycleTimer = scene.time.addEvent({
-      delay: gameConfig.win.lineCycleMs,
+      delay: LINE.drawMs + LINE.holdMs,
       loop: true,
       paused: true,
       callback: this.nextLine,
@@ -122,6 +126,13 @@ export class WinLines {
     this.draw();
   }
 
+  /** Restart the draw-in at the current (turbo-aware) duration. */
+  private restartReveal() {
+    // a persistent tween keeps its duration; set it before every restart so turbo applies
+    (this.revealTween.data[0] as Phaser.Tweens.TweenData).duration = this.anim.dur(LINE.drawMs);
+    this.revealTween.restart();
+  }
+
   /** animate: lines draw in again (new lines shown); false keeps the current progress (relayout). */
   private draw(animate = true) {
     this.mask.fill(false);
@@ -145,10 +156,15 @@ export class WinLines {
         this.frames[c].setVisible(true).setTint(this.color(w));
       }
     }
-    if (animate) this.revealTween.restart();
+    if (animate) this.restartReveal();
     this.drawLines();
     this.reels.highlight(this.mask);
-    if (this.pulse.isPaused()) this.pulse.resume();
+    // reduced motion: frames stay steady instead of pulsing
+    if (this.anim.reduced) {
+      this.pulse.pause();
+      this.cells.setAlpha(1);
+    } else if (this.pulse.isPaused()) this.pulse.resume();
+    if (one && animate) this.anim.emit(ANIM_EVENTS.lineShown, this.wins[this.showing].line);
 
     if (one) {
       const w = this.wins[this.showing];
@@ -156,7 +172,7 @@ export class WinLines {
       this.label
         .setText(formatMoney(w.win))
         .setFontSize(Math.round(sd(46)))
-        .setStroke('#3a1500', sd(8))
+        .setStroke(THEME.stroke, sd(8))
         .setPosition(cellX(last), cellY(PAYLINES[w.line][last]) + sd(layout.cell * 0.36))
         .setVisible(true);
     } else {
@@ -180,18 +196,22 @@ export class WinLines {
   private drawLines() {
     this.lines.clear();
     if (this.showing === -1) return;
-    for (let i = this.from(); i < this.to(); i++) this.drawLine(this.wins[i], this.reveal.p);
+    // glowing stroke: a wide soft pass under the core line
+    for (let i = this.from(); i < this.to(); i++) {
+      this.drawLine(this.wins[i], this.reveal.p, sd(20), 0.22);
+      this.drawLine(this.wins[i], this.reveal.p, sd(7), 0.95);
+    }
   }
 
   /** Polyline lead-in, every reel center, lead-out; cut at fraction p of its width. */
-  private drawLine(w: LineWin, p: number) {
+  private drawLine(w: LineWin, p: number, width: number, alpha: number) {
     const rows = PAYLINES[w.line];
     const half = sd(layout.cell) * 0.5;
     const x0 = cellX(0) - half;
     const xEnd = x0 + p * (cellX(REELS - 1) + half - x0);
     let px = x0;
     let py = cellY(rows[0]);
-    const g = this.lines.lineStyle(sd(7), this.color(w), 0.95).beginPath();
+    const g = this.lines.lineStyle(width, this.color(w), alpha).beginPath();
     g.moveTo(px, py);
     for (let i = 0; i <= REELS; i++) {
       const x = i < REELS ? cellX(i) : cellX(REELS - 1) + half;

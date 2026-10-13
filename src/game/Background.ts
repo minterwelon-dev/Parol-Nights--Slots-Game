@@ -4,8 +4,14 @@ import { ART } from '../theme/parolNights';
 import { layout, sd, sx, sy, type Layout } from '../utils/responsive';
 
 /** Cover-fit art; retain the loaded orientation until the other background arrives. */
+/** Extra cover so the ambient parallax never shows an edge (reference px, per side). */
+const PARALLAX_MARGIN = 8;
+
 export class Background {
   private image: Phaser.GameObjects.Image;
+  /** layout x of the image center, before the ambient parallax offset */
+  private baseX = 0;
+  private parallax = 0;
   constructor(private scene: Phaser.Scene) {
     const requested = layout.landscape ? ART.landscape : ART.portrait;
     const available = scene.textures.exists(requested.key)
@@ -29,9 +35,24 @@ export class Background {
     const source = this.image.texture.getSourceImage();
     const width = this.scene.scale.width / l.s;
     const height = this.scene.scale.height / l.s;
-    const cover = Math.max(width / source.width, height / source.height);
+    const cover = Math.max(
+      (width + PARALLAX_MARGIN * 2) / source.width,
+      (height + PARALLAX_MARGIN * 2) / source.height,
+    );
+    this.baseX = sx(l.w / 2);
     this.image
-      .setPosition(sx(l.w / 2), sy(l.h / 2))
+      .setPosition(this.baseX + this.parallax, sy(l.h / 2))
       .setDisplaySize(sd(source.width * cover), sd(source.height * cover));
+  }
+
+  /** Ambient parallax: horizontal offset in canvas px (kept within the cover margin). */
+  setParallax(dx: number) {
+    this.parallax = dx;
+    this.image.setX(this.baseX + dx);
+  }
+
+  /** Feature palette shift. */
+  setTint(color: number) {
+    this.image.setTint(color);
   }
 }

@@ -22,7 +22,7 @@ No damaged or missing delivered assets were found.
 | `ui_btn`, former `ui_pill_off` | `ui/button_plaque.webp` | One base, code state tints |
 | `logo-ornament` | `ui/logo_ornament.webp` | Empty ornament plus live title text |
 | Former `ui_coin` | `sym_COIN` | Red envelope with live value/jackpot labels |
-| Food icons | Six `icons/*.webp` entries | Mapped, but no dish-table consumer exists; no runtime request |
+| Food icons | Six `icons/*.webp` entries | Free Spins feast table (`FeastTable.ts`), deferred load |
 
 One mapping lives in `src/theme/parolNights.ts`. Boot generates old symbol/UI placeholders
 only if loading fails. Background, frame and ornament also have safe generated fallbacks.
@@ -108,3 +108,48 @@ See `_review/art-browser.json`, `_review/art-production.json` and `_review/art-a
 
 No unresolved art questions. Real iOS/WKWebView and physical Android verification remain outside
 the available browser environment.
+
+## Audit fixes
+
+Applied after an audit of the first integration pass. Math, RGS and state machine are unchanged.
+
+- **Backgrounds:** `scripts/assets/runtime.py` now bakes a slight blur (Gaussian radius 3 at
+  1280 px) into the runtime copies, plus a darker top band (up to 30%, fading out over the top 45%).
+  The tuning knobs are at the top of the script. The blur is baked, not a runtime filter, because a
+  fullscreen blur costs GPU every frame and canvas `ctx.filter` is unsupported on iOS Safari. Each
+  background dropped from about 105 KB to 35 KB, so critical art is now about 423 KB in either
+  orientation.
+- **Spin button:** the delivered disc carries a code-drawn themed icon: a twin-arrow ring (navy, cream
+  halo) around a lantern-red parol star. While the reels spin, the ring turns and the star becomes
+  a red stop square. Ring and marks hide behind the LOADING text. The idle glow is softer.
+- **Symbols:** shown at 1.05 of the cell, because every symbol has a ~7.5% transparent margin, so the
+  visible art fills about 89% of the cell. The Hold & Win envelope is shown at the full cell.
+- **Landscape layout:** the frame's maximum height is now 690 (was 650). The logo is smaller, and the
+  HUD panel sits 15 units lower.
+- **Hold & Win:** each value sits on a `button_plaque` across the envelope's lower half, clear of the
+  emblem. Jackpot labels have a heavier stroke. Empty cells and the board are navy.
+- **Palette:** text strokes use `THEME.stroke` (navy). Panel edges are gold. The modal panel is navy
+  with a gold edge. Old ember-brown values are removed.
+- **Turbo plaque:** larger, with the label scaled up to match.
+- **Free Spins feast table:** `FeastTable.ts` shows six round plates. In landscape they flank the
+  reels, three per side. In portrait they sit in one row under the controls. Each plate starts with
+  a faint dish silhouette and fills with its dish, with a pop and a glow, as the round progresses.
+  The fill level is `floor(6 * played / (played + left))` from response counts and never drops, so a
+  retrigger slows the filling and a resumed round starts partly filled. The food icons load with the
+  deferred art.
+- **Code:** button sizes come from the texture size instead of hard-coded 512/192. The local
+  placeholder table in `BootScene` is renamed to `PLACEHOLDER`. The unreachable coin generator is
+  removed. Motion-blur textures are built at their source size (320 px for delivered art). The HUD
+  press tint is set before the press handler runs, so a press that disables the button stays grey.
+- **Title:** the live title centers on the centroid of the ornament's inner navy panel (measured from
+  the art: 383.6, 119.3 of 768 x 288), and it centers the letters' ink rather than the text box.
+  The landscape logo sits 32 units lower (y 98) and the Free Spins bar moved down 8 to stay clear.
+- **Sizes:** info and mute buttons are larger (92 landscape / 104 portrait). The paytable has
+  bigger tabs and close button. Content text is scaled by `MODAL_LAYOUT.text` (1.15 landscape /
+  1.3 portrait), and the modal panel is taller.
+- **Paytable balance:** every page measures its content, then spaces it evenly. Pays: identical
+  icon/count/amount groups sized to the widest one, partial last row centered, grid centered between
+  tabs and footer. Features: blocks (icon or text, whichever is taller) with equal gaps above,
+  between and below; each icon centers on its own text. Lines: label + mini grid centered in each
+  cell. Rules: titled sections (gold heading + text) in rows of `MODAL_LAYOUT.ruleCols` (2 landscape,
+  1 portrait), evenly spaced, with faint gold dividers between rows.

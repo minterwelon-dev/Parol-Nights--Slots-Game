@@ -53,7 +53,8 @@ WHERE IT IS WIRED (code)
 src/assets.ts                 SFX manifest: key -> file URL
 src/game/SoundManager.ts      gating, mute, hidden-tab suspend, VOLUME map, play/stop
 src/scenes/GameScene.ts       maps game events to sounds:
-                                reels.hooks.spin / land / tease -> spin / stop / tease
+                                spinStart / reelLanded /        -> spin / stop / tease
+                                anticipationStart (scene.events)
                                 presenter.onWin(big)            -> win / bigwin
                                 holdAndWin.onCoin               -> coin
                                 feature start                   -> feature

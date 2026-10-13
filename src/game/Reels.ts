@@ -1,58 +1,23 @@
 import Phaser from 'phaser';
 import { DEPTH, THEME } from '../constants';
-import type { SpinTiming } from '../gameConfig';
+import { gameConfig, type SpinTiming } from '../gameConfig';
 import { REELS, ROWS } from '../math/config';
 import type { SymbolId } from '../rgs/types';
 import { sd, sx, sy, type Layout } from '../utils/responsive';
-import { UI } from '../scenes/BootScene';
 import { ART } from '../theme/parolNights';
 import { SymbolView } from './Symbol';
+import type { AnimationService } from './animation/AnimationService';
+import { ReelAnimator } from './animation/ReelAnimator';
+import { SymbolAnimator } from './animation/SymbolAnimator';
+import type { AnimationHandle } from './animation/AnimationHandle';
 
 /** Symbols per reel: visible rows plus one buffer above and below. */
 const SLOTS = ROWS + 2;
 /** Symbol display size relative to the cell. */
-const SYMBOL_FILL = 0.92;
-/** Symbols fed in on landing: the result column bottom-up, then the strip symbol above it. */
-const LANDING = ROWS + 1;
-/** Largest motion carried into the bounce, in cells; avoids a visible pop at high speed. */
-const MAX_CARRY = 0.3;
-/** Alpha of non-winning symbols during win display. */
-const DIMMED = 0.35;
-/** Peak size growth of a winning symbol during its pulse. */
-const WIN_GROW = 0.06;
-/** Fraction of full speed above which symbols switch to their motion-blur textures. */
-const BLUR_AT = 0.6;
-/** Landing pop for SCATTER / COIN: peak size growth and duration. */
-const LAND_POP = 0.18;
-const LAND_POP_MS = 280;
+const SYMBOL_FILL = 1.05; // delivered art has a ~7.5% transparent margin: ~89% visible
+const TEASE = gameConfig.anim.anticipation;
 
 type Strips = readonly (readonly SymbolId[])[];
-
-/** Per-reel motion state. Allocated once, reused every spin. */
-interface Run {
-  spinning: boolean;
-  /** strip index of the last symbol fed into slot 0 */
-  top: number;
-  /** downward offset in cells, [0, 1) while moving */
-  offset: number;
-  /** cells per second */
-  speed: number;
-  /** reel clock time when landing starts; Infinity = not scheduled */
-  stopAt: number;
-  landing: boolean;
-  /** views currently show motion-blur textures */
-  blurred: boolean;
-  feed: SymbolId[];
-  fed: number;
-  /** ms into the bounce, -1 = not bouncing */
-  bounceT: number;
-  /** offset at the moment of landing, eased out during the bounce */
-  carry: number;
-  /** anticipation: extra delay before landing and a glow once the previous reel lands */
-  tease: boolean;
-  /** ms into the start wind-up; negative = waiting for this reel's stagger */
-  windT: number;
-}
 
 /** Masked reel window with pooled symbols; spins on strips, lands on the response grid. */
 export class Reels {
@@ -62,35 +27,29 @@ export class Reels {
   private highlights: Phaser.GameObjects.Container;
   private maskShape: Phaser.GameObjects.Graphics;
   private glow: Phaser.GameObjects.Graphics;
+  /** anticipation vignette over the reels that are not teased */
+  private shade: Phaser.GameObjects.Graphics;
   private glowPulse: Phaser.Tweens.Tween;
-  /** win animation: one soft glow per visible cell (reel * ROWS + row) behind the symbols */
-  private winGlows: Phaser.GameObjects.Image[] = [];
-  private winMask: boolean[] = new Array(REELS * ROWS).fill(false);
-  /** running landing pop per cell; its glow finishes fading even when highlight() hides the others */
-  private pops: (Phaser.Tweens.Tween | undefined)[] = new Array(REELS * ROWS).fill(undefined);
-  /** single persistent tween; k goes 0..1..0 while a win is shown */
-  private winPulse: Phaser.Tweens.Tween;
-  private pulse = { k: 0 };
   /** reels glowing right now */
   private glowing: boolean[] = new Array(REELS).fill(false);
   /** window rect in canvas px, kept for glow redraws */
   private win = { x: 0, y: 0, h: 0 };
   /** [reel][slot], slot 0 is the hidden buffer above row 0. Rotated in place while spinning. */
   private cols: SymbolView[][] = [];
-  private runs: Run[] = [];
   private strips: Strips;
   /** last landed grid, restored by halt() */
   private grid: SymbolId[][] = [];
   private cell = 0;
-  private clock = 0;
-  private timing!: SpinTiming;
-  private pending = 0;
-  private done?: () => void;
-  /** presentation hooks (sound); GameScene wires them */
-  hooks: { spin?(): void; land?(reel: number): void; tease?(reel: number): void } = {};
+  /** current offset per reel in cells, kept so relayout can re-place a moving reel */
+  private offsets: number[] = new Array(REELS).fill(0);
+  /** symbol states: idle, land, win, dim */
+  private symbols: SymbolAnimator;
+  /** reel motion; it drives the views through the callbacks given in the constructor */
+  private motion: ReelAnimator;
 
   constructor(
-    private scene: Phaser.Scene,
+    scene: Phaser.Scene,
+    private anim: AnimationService,
     strips: Strips,
     grid: readonly SymbolId[][],
   ) {
@@ -102,33 +61,15 @@ export class Reels {
     this.maskShape = scene.make.graphics({}, false);
     this.container.setMask(this.maskShape.createGeometryMask());
     this.glow = scene.add.graphics().setDepth(DEPTH.REEL_FRAME_FRONT);
+    this.shade = scene.add.graphics().setDepth(DEPTH.SYMBOL_HIGHLIGHT);
     this.glowPulse = scene.tweens.add({
       targets: this.glow,
       alpha: 0.35,
-      duration: 260,
+      duration: gameConfig.anim.timings.teaseGlowPulseMs,
       yoyo: true,
       repeat: -1,
       paused: true,
       persist: true,
-    });
-
-    // Unmasked additive glows can extend softly beneath the front frame.
-    for (let i = 0; i < REELS * ROWS; i++) {
-      this.winGlows.push(
-        scene.add.image(0, 0, UI.glow).setVisible(false).setBlendMode(Phaser.BlendModes.ADD),
-      );
-    }
-    this.highlights.add(this.winGlows);
-    this.winPulse = scene.tweens.add({
-      targets: this.pulse,
-      k: 1,
-      duration: 380,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1,
-      paused: true,
-      persist: true,
-      onUpdate: () => this.applyPulse(),
     });
 
     for (let r = 0; r < REELS; r++) {
@@ -136,28 +77,32 @@ export class Reels {
       for (let i = 0; i < SLOTS; i++) col.push(new SymbolView(scene, this.container, 'L1'));
       this.cols.push(col);
       this.grid.push([]);
-      this.runs.push({
-        spinning: false,
-        top: 0,
-        offset: 0,
-        speed: 0,
-        stopAt: Infinity,
-        landing: false,
-        feed: new Array<SymbolId>(LANDING).fill('L1'),
-        fed: 0,
-        bounceT: -1,
-        carry: 0,
-        tease: false,
-        blurred: false,
-        windT: 0,
-      });
     }
+    this.motion = new ReelAnimator(
+      anim,
+      {
+        shift: (r, id) => this.shift(r, id),
+        place: (r, offset) => this.place(r, offset),
+        setBlur: (r, on) => this.setBlur(r, on),
+        snap: (r, above) => this.snap(r, above),
+        landed: (r, snapped) => this.symbols.landed(r, snapped),
+        tease: (r, on) => this.tease(r, on),
+      },
+      strips,
+    );
+    this.symbols = new SymbolAnimator(
+      scene,
+      anim,
+      this.highlights,
+      (r, row) => this.cols[r][row + 1],
+    );
     this.setGrid(grid);
   }
 
   /** Swap the strips used for the visual spin (base <-> free spins). Takes effect next spin. */
   setStrips(strips: Strips) {
     this.strips = strips;
+    this.motion.setStrips(strips);
   }
 
   /** Show a grid directly (idle / resume / error halt). */
@@ -171,32 +116,26 @@ export class Reels {
         col[row + 1].set(grid[r][row]);
       }
       col[SLOTS - 1].set(strip[1]);
-      this.runs[r].offset = 0;
       this.setBlur(r, false);
-      this.place(r);
+      this.place(r, 0);
     }
+    this.symbols.reset();
+  }
+
+  /** Idle sway / breathe while the state machine sits in Idle. */
+  setIdle(on: boolean) {
+    this.symbols.setIdle(on);
   }
 
   /** Start all reels. Landing is scheduled later by stop(). */
   spin(timing: SpinTiming) {
-    this.hooks.spin?.();
-    this.timing = timing;
-    this.pending = REELS;
-    for (let r = 0; r < REELS; r++) {
-      const run = this.runs[r];
-      run.spinning = true;
-      run.speed = 0;
-      run.stopAt = Infinity;
-      run.landing = false;
-      run.fed = 0;
-      run.bounceT = -1;
-      run.windT = -r * timing.windUpStaggerMs;
-    }
+    this.symbols.spinStart();
+    this.motion.spin(timing);
   }
 
   /**
    * Land on the response. Reel r lands one stagger after reel r - 1, or one anticipation
-   * delay when tease[r] is set. quick drops all delays and anticipation.
+   * delay when tease[r] is set. quick snaps every reel to the grid at once.
    */
   stop(
     stops: readonly number[],
@@ -204,62 +143,15 @@ export class Reels {
     quick: boolean,
     tease?: readonly boolean[],
   ): Promise<void> {
-    let at = this.clock;
     for (let r = 0; r < REELS; r++) {
-      const strip = this.strips[r];
-      const run = this.runs[r];
-      for (let row = 0; row < ROWS; row++) {
-        run.feed[row] = grid[r][ROWS - 1 - row];
-        this.grid[r][row] = grid[r][row];
-      }
-      run.feed[ROWS] = strip[(stops[r] - 1 + strip.length) % strip.length];
-      run.top = stops[r] - 1;
-      run.tease = !quick && !!tease?.[r];
-      if (r > 0 && !quick) at += run.tease ? this.timing.anticipationMs : this.timing.stopStaggerMs;
-      run.stopAt = at;
+      for (let row = 0; row < ROWS; row++) this.grid[r][row] = grid[r][row];
     }
-    return new Promise((resolve) => {
-      this.done = resolve;
-      if (this.pending === 0) resolve();
-    });
+    return this.motion.stop(stops, grid, quick, tease);
   }
 
-  /** Dim every visible symbol not in mask (index reel * ROWS + row); null restores all. */
+  /** Win cells (index reel * ROWS + row) pop and breathe, the rest dim; null restores all. */
   highlight(mask: readonly boolean[] | null) {
-    let any = false;
-    for (let r = 0; r < REELS; r++) {
-      for (let row = 0; row < ROWS; row++) {
-        const i = r * ROWS + row;
-        const win = !!mask && mask[i];
-        this.winMask[i] = win;
-        any ||= win;
-        this.cols[r][row + 1].root.setAlpha(!mask || win ? 1 : DIMMED);
-        this.winGlows[i].setVisible(win || !!this.pops[i]);
-      }
-    }
-    if (any) {
-      if (this.winPulse.isPaused()) this.winPulse.resume();
-    } else {
-      this.winPulse.pause();
-      this.pulse.k = 0;
-      this.applyPulse(); // back to resting sizes before anything spins
-    }
-  }
-
-  /** Winning symbol containers breathe around their base scale of 1 and their glow brightens. */
-  private applyPulse() {
-    const k = this.pulse.k;
-    const base = 1;
-    const grown = 1 + WIN_GROW * k;
-    const glow = this.cell * (1.15 + 0.1 * k);
-    for (let r = 0; r < REELS; r++) {
-      for (let row = 0; row < ROWS; row++) {
-        const i = r * ROWS + row;
-        const s = this.winMask[i] ? grown : base;
-        this.cols[r][row + 1].root.setScale(s);
-        if (this.winMask[i]) this.winGlows[i].setDisplaySize(glow, glow).setAlpha(0.35 + 0.5 * k);
-      }
-    }
+    this.symbols.highlight(mask);
   }
 
   /** True if the visible window shows exactly this grid (dev assertion after landing). */
@@ -271,123 +163,56 @@ export class Reels {
     return true;
   }
 
-  /** Quick stop: every reel not yet landing lands now, without anticipation. */
+  /** Quick stop: every reel with a known result snaps to it now, without anticipation. */
   slam() {
-    for (let r = 0; r < REELS; r++) {
-      const run = this.runs[r];
-      run.tease = false;
-      if (run.stopAt !== Infinity && !run.landing) run.stopAt = this.clock;
-    }
-    this.setGlow(-1, false);
+    this.motion.slam();
   }
 
   /** Abort a spin without a result (RGS error): snap back to the last landed grid. */
   halt() {
-    for (let r = 0; r < REELS; r++) this.runs[r].spinning = false;
-    this.pending = 0;
-    this.setGlow(-1, false);
+    this.motion.halt();
     this.setGrid(this.grid);
   }
 
   update(dtMs: number) {
-    if (this.pending === 0) return;
-    this.clock += dtMs;
-    const t = this.timing;
+    this.motion.update(dtMs);
+    this.symbols.update(dtMs);
+  }
+
+  /** Reel r shows its landed column at rest (skip). above = strip symbol above row 0. */
+  private snap(r: number, above: SymbolId) {
+    const col = this.cols[r];
+    col[0].set(above);
+    for (let row = 0; row < ROWS; row++) col[row + 1].set(this.grid[r][row]);
+    this.place(r, 0);
+  }
+
+  /**
+   * Anticipation on reel r (-1 = all off): glow + vignette, and the symbols that make the trigger
+   * possible pulse. Contributors are counted on the reels already landed, as `utils/anticipation` does.
+   */
+  private tease(r: number, on: boolean) {
+    this.setGlow(r, on);
+    if (!on) return this.symbols.setTease(false, false);
+    let scatters = 0;
+    let coins = 0;
+    for (let c = 0; c < r; c++) {
+      for (let row = 0; row < ROWS; row++) {
+        if (this.grid[c][row] === 'SCATTER') scatters++;
+        else if (this.grid[c][row] === 'COIN') coins++;
+      }
+    }
+    const t = gameConfig.anticipation;
+    this.symbols.setTease(scatters >= t.scatter, coins >= t.coin);
+  }
+
+  /** Feature trigger on every visible `id` (from the response grid); the rest dim. Skippable handle. */
+  trigger(id: SymbolId): AnimationHandle {
+    const mask: boolean[] = [];
     for (let r = 0; r < REELS; r++) {
-      const run = this.runs[r];
-      if (!run.spinning) continue;
-
-      if (run.bounceT >= 0) {
-        run.bounceT += dtMs;
-        const k = Math.min(run.bounceT / t.bounceMs, 1);
-        // ease the carried motion out while dipping past the stop and back
-        run.offset = run.carry * (1 - k) * (1 - k) + t.bounceAmp * Math.sin(Math.PI * k);
-        if (k === 1) {
-          run.offset = 0;
-          run.spinning = false;
-          run.bounceT = -1;
-          this.landed(r);
-          if (--this.pending === 0) this.done?.();
-        }
-        this.place(r);
-        continue;
-      }
-
-      if (run.windT < t.windUpMs) {
-        // wind-up: nudge up and settle back before the drop (a stop can't land before it ends)
-        run.windT += dtMs;
-        const k = Math.min(Math.max(run.windT / t.windUpMs, 0), 1);
-        run.offset = -t.windUpAmp * Math.sin(Math.PI * k);
-        this.place(r);
-        continue;
-      }
-
-      if (!run.landing && this.clock >= run.stopAt) run.landing = true;
-      run.speed = Math.min(t.speed, run.speed + (t.speed * dtMs) / t.accelMs);
-      this.setBlur(r, run.speed >= BLUR_AT * t.speed);
-      run.offset += (run.speed * dtMs) / 1000;
-
-      while (run.offset >= 1) {
-        run.offset -= 1;
-        if (run.landing) {
-          this.shift(r, run.feed[run.fed++]);
-          if (run.fed === LANDING) {
-            run.carry = Math.min(run.offset, MAX_CARRY);
-            run.bounceT = 0;
-            this.setBlur(r, false); // land sharp: the result must read clearly
-            run.offset = run.carry;
-            break;
-          }
-        } else {
-          const strip = this.strips[r];
-          run.top = (run.top - 1 + strip.length) % strip.length;
-          this.shift(r, strip[run.top]);
-        }
-      }
-      this.place(r);
+      for (let row = 0; row < ROWS; row++) mask.push(this.grid[r][row] === id);
     }
-  }
-
-  /** Reel r finished its bounce: its glow ends, the next teased reel starts glowing. */
-  private landed(r: number) {
-    this.hooks.land?.(r);
-    this.setGlow(r, false);
-    for (let row = 0; row < ROWS; row++) {
-      const id = this.grid[r][row];
-      if (id === 'SCATTER' || id === 'COIN') this.landPop(r, row);
-    }
-    if (r + 1 < REELS && this.runs[r + 1].tease && this.runs[r + 1].spinning) {
-      this.setGlow(r + 1, true);
-      this.hooks.tease?.(r + 1);
-    }
-  }
-
-  /** Feature symbol settles: quick size bump plus a fading glow burst. Win display owns the cell once set. */
-  private landPop(r: number, row: number) {
-    const i = r * ROWS + row;
-    const root = this.cols[r][row + 1].root;
-    const glow = this.winGlows[i].setVisible(true);
-    this.pops[i]?.stop(); // same cell landed again before the last pop ended
-    this.pops[i] = this.scene.tweens.addCounter({
-      from: 0,
-      to: 1,
-      duration: LAND_POP_MS,
-      ease: 'Sine.easeOut',
-      onUpdate: (t) => {
-        if (this.winMask[i]) return;
-        const k = t.getValue() ?? 1;
-        const s = 1 + LAND_POP * Math.sin(Math.PI * k);
-        const g = this.cell * (1 + 0.6 * k);
-        root.setScale(s);
-        glow.setDisplaySize(g, g).setAlpha(0.9 * (1 - k));
-      },
-      onComplete: () => {
-        this.pops[i] = undefined;
-        if (this.winMask[i]) return;
-        root.setScale(1);
-        glow.setVisible(false);
-      },
-    });
+    return this.symbols.trigger(mask);
   }
 
   /** Toggle one reel's glow (r = -1: all off) and redraw. */
@@ -399,13 +224,14 @@ export class Reels {
 
   private drawGlow() {
     const g = this.glow.clear();
+    const shade = this.shade.clear();
     let any = false;
     for (let r = 0; r < REELS; r++) {
       if (!this.glowing[r]) continue;
       any = true;
       const x = this.win.x + r * this.cell;
       g.fillStyle(0xffc23d, 0.18).fillRoundedRect(x, this.win.y, this.cell, this.win.h, sd(14));
-      g.lineStyle(sd(8), 0xffd34d, 1).strokeRoundedRect(
+      g.lineStyle(sd(8), 0xffd34d, TEASE.glowAlpha).strokeRoundedRect(
         x + sd(4),
         this.win.y + sd(4),
         this.cell - sd(8),
@@ -413,17 +239,22 @@ export class Reels {
         sd(14),
       );
     }
-    if (any && this.glowPulse.isPaused()) this.glowPulse.resume();
-    if (!any) {
+    if (any) {
+      shade.fillStyle(0x000000, TEASE.vignetteAlpha);
+      for (let r = 0; r < REELS; r++) {
+        if (!this.glowing[r])
+          shade.fillRect(this.win.x + r * this.cell, this.win.y, this.cell, this.win.h);
+      }
+    }
+    // reduced motion: a steady glow, no pulse
+    if (any && !this.anim.reduced && this.glowPulse.isPaused()) this.glowPulse.resume();
+    if (!any || this.anim.reduced) {
       this.glowPulse.pause();
       this.glow.setAlpha(1);
     }
   }
 
   private setBlur(r: number, on: boolean) {
-    const run = this.runs[r];
-    if (run.blurred === on) return;
-    run.blurred = on;
     for (let i = 0; i < SLOTS; i++) this.cols[r][i].setBlur(on);
   }
 
@@ -435,9 +266,10 @@ export class Reels {
     col.unshift(v);
   }
 
-  private place(r: number) {
+  private place(r: number, offset: number) {
+    this.offsets[r] = offset;
     const col = this.cols[r];
-    const y0 = (this.runs[r].offset - 0.5) * this.cell;
+    const y0 = (offset - 0.5) * this.cell;
     for (let i = 0; i < SLOTS; i++) col[i].root.y = y0 + i * this.cell;
   }
 
@@ -456,15 +288,10 @@ export class Reels {
         this.cols[r][i].root.setX((r + 0.5) * cell);
         this.cols[r][i].resize(cell * SYMBOL_FILL);
       }
-      this.place(r);
+      this.place(r, this.offsets[r]);
     }
 
-    for (let r = 0; r < REELS; r++) {
-      for (let row = 0; row < ROWS; row++) {
-        this.winGlows[r * ROWS + row].setPosition((r + 0.5) * cell, (row + 0.5) * cell);
-      }
-    }
-    this.applyPulse();
+    this.symbols.relayout(cell, x, y);
 
     this.maskShape.clear().fillStyle(0xffffff).fillRect(x, y, w, h);
     this.win.x = x;

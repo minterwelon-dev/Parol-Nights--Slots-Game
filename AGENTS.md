@@ -41,7 +41,8 @@ src/
     Reels.ts             # Masked reel container, pooled symbols, spin/stop
     Symbol.ts            # One symbol view (static + win animation)
     WinLines.ts          # Line highlight renderer
-    WinPresenter.ts      # Count-up, win tiers, big win overlay
+    animation/           # ANIMATION_SPEC.md: AnimationService, AnimationHandle, ReelAnimator,
+                         # SymbolAnimator, WinPresenter (count-up, tiers, big win), FxPool, fxTextures
     FreeSpins.ts         # Free spins presentation
     HoldAndWin.ts        # Hold & Win presentation
     Hud.ts               # Balance, bet, win, spin, turbo
@@ -187,7 +188,7 @@ Keep project-authored error handling meaningful: visible fallback UI, `console.w
 - [x] No `console.error` in production output
 - [x] Production bundle contains no debug panel or forced-outcome code
 - [x] Paytable modal generated from `math/paytable.ts`
-- [ ] README, simulation report, live demo link, gameplay video present _(README + report done; demo link and video skipped, see SKIPPED.md)_
+- [ ] README, simulation report, live demo link, gameplay video present _(README, report and video done; demo link after the first GitHub Pages deploy)_
 
 ## Pitfalls
 | Issue | Fix |

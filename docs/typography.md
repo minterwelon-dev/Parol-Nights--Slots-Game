@@ -9,6 +9,7 @@ The requested pair is used without a third numeric family:
 | Use | Font / weights | License | Reason |
 |---|---|---|---|
 | Live game title | Cinzel Decorative 700 | SIL Open Font License 1.1 | Ornamental letterforms complement the gold bamboo banner. |
+| Feature and win titles (FREE SPINS, HOLD & WIN, GRAND, BIG / MEGA / EPIC WIN, summaries, retrigger banner) | Cinzel Decorative 700 | SIL Open Font License 1.1 | Same logo look via `goldTitle()` in `src/game/fx.ts`: `THEME.titleGold` gradient, navy stroke, warm glow. Amounts and counters stay Baloo 2 for legible tabular digits. |
 | UI and numbers | Baloo 2 400, 700 | SIL Open Font License 1.1 | Rounded friendly shapes, clear digits and equal digit advances. |
 
 Both installed Fontsource packages are 5.3.0. Licenses were read from the packages

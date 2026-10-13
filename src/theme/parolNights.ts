@@ -36,11 +36,14 @@ export const ART = {
   portrait: asset('bg_portrait', 'runtime/bg/bg_portrait.webp'),
   frame: asset('reel_frame', 'frame/reel_frame.webp'),
   spin: asset('ui_spin', 'ui/spin_button.webp'),
+  spinArrow: asset('ui_spin_arrow', 'ui/spin_arrows.webp'),
+  spinStar: asset('ui_spin_star', 'ui/spin_star.webp'),
+  stop: asset('ui_stop', 'ui/stop_icon.webp'),
   round: asset('ui_round', 'ui/button_round.webp'),
   plaque: asset('ui_btn', 'ui/button_plaque.webp'),
   logo: asset('logo-ornament', 'ui/logo_ornament.webp'),
 };
-// Delivered for a future dish-table view; no such consumer exists in this client yet.
+// Noche Buena dishes: the Free Spins feast table (FeastTable.ts) fills with these. Deferred.
 export const FOOD = [
   'queso_de_bola',
   'hamon',
@@ -52,8 +55,9 @@ export const FOOD = [
 export const UI = {
   px: 'ui_px',
   spin: ART.spin.key,
-  spinArrow: 'ui_spin_arrow',
-  stop: 'ui_stop',
+  spinArrow: ART.spinArrow.key,
+  spinStar: ART.spinStar.key,
+  stop: ART.stop.key,
   round: ART.round.key,
   coin: symbolKey('COIN'),
   glow: 'ui_glow',
@@ -62,6 +66,8 @@ export const UI = {
   pillOff: ART.plaque.key,
   soundOn: 'ui_sound_on',
   soundOff: 'ui_sound_off',
+  motionOn: 'ui_motion_on',
+  motionOff: 'ui_motion_off',
   btn: ART.plaque.key,
   panel: 'ui_panel',
 } as const;
@@ -71,10 +77,16 @@ export const criticalArt = (landscape: boolean) => [
   ART.frame,
   ART.logo,
   ART.spin,
+  ART.spinArrow,
+  ART.spinStar,
+  ART.stop,
   ART.round,
   ART.plaque,
 ];
-export const deferredArt = (landscape: boolean) => [landscape ? ART.portrait : ART.landscape];
+export const deferredArt = (landscape: boolean) => [
+  landscape ? ART.portrait : ART.landscape,
+  ...FOOD,
+];
 const warned = new Set<string>();
 export function warnMissing(key: string) {
   if (warned.has(key)) return;

@@ -56,7 +56,9 @@ export class ErrorModal {
     this.dim.setDisplaySize(this.scene.scale.width, this.scene.scale.height);
     this.panel.setPosition(cx, cy).setDisplaySize(sd(800), sd(450));
     this.text.setPosition(cx, cy - sd(60)).setFontSize(Math.round(sd(46)));
-    this.btn.setPosition(cx, cy + sd(120)).setDisplaySize(sd((110 * 512) / 192), sd(110));
+    this.btn
+      .setPosition(cx, cy + sd(120))
+      .setDisplaySize(sd((110 * this.btn.width) / this.btn.height), sd(110));
     this.label.setPosition(cx, cy + sd(120)).setFontSize(Math.round(sd(44)));
   }
 }

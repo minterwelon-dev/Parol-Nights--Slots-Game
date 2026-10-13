@@ -155,8 +155,8 @@ Tick items as they are completed.
 - [x] FPS check under CPU throttle (mobile profile)
 - [x] Bundle size reported (raw and gzip)
 - [x] README with architecture diagram, state machine, RGS contract, how to run the simulation
-- [ ] Deployed demo (GitHub Pages or Netlify) _(skipped, see SKIPPED.md)_
-- [ ] 30–60 second gameplay video showing base game, free spins, hold & win, debug panel forcing a feature _(skipped, see SKIPPED.md)_
+- [ ] Deployed demo (GitHub Pages or Netlify) _(Pages workflow added; waiting for the GitHub repo and first push)_
+- [x] 30–60 second gameplay video showing base game, free spins, hold & win, debug panel forcing a feature (`docs/media/gameplay.mp4`, 39 s)
 
 ## 6. Acceptance criteria
 

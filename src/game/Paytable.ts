@@ -30,7 +30,9 @@ const PAGES: readonly { id: Page; label: string }[] = [
 const PAY_ORDER = (Object.keys(PAYTABLE) as PaySymbol[]).sort(
   (a, b) => PAYTABLE[b][2] - PAYTABLE[a][2],
 );
-const TOP = 210; // content starts below title + tabs (panel-local, reference px)
+const TOP = 230; // content starts below title + tabs (panel-local, reference px)
+const BOTTOM = 40; // content ends this far above the panel's bottom edge
+const GAP = 24; // between the pays grid and its footer
 
 /**
  * Paytable / rules modal. Every number comes from src/math (pays, lines, feature rules,
@@ -157,11 +159,11 @@ export class Paytable {
       .lineStyle(sd(4), THEME.frame, 1)
       .strokeRoundedRect(sx(m.x), sy(m.y), sd(m.w), sd(m.h), sd(36));
     this.title
-      .setPosition(this.X(m.w / 2), this.Y(66))
-      .setFontSize(Math.round(sd(54)))
+      .setPosition(this.X(m.w / 2), this.Y(70))
+      .setFontSize(Math.round(sd(60)))
       .setStroke(THEME.stroke, sd(8));
-    this.closeBtn.setPosition(this.X(m.w - 70), this.Y(66)).setDisplaySize(sd(76), sd(76));
-    this.closeLabel.setPosition(this.X(m.w - 70), this.Y(64)).setFontSize(Math.round(sd(36)));
+    this.closeBtn.setPosition(this.X(m.w - 76), this.Y(70)).setDisplaySize(sd(92), sd(92));
+    this.closeLabel.setPosition(this.X(m.w - 76), this.Y(68)).setFontSize(Math.round(sd(44)));
 
     const tw = m.tab.w;
     const gap = 16;
@@ -170,14 +172,14 @@ export class Paytable {
       const on = t.id === page;
       t.img
         .setTint(on ? 0xffdf80 : 0xb0b0c8)
-        .setPosition(this.X(x0 + i * (tw + gap)), this.Y(146))
+        .setPosition(this.X(x0 + i * (tw + gap)), this.Y(160))
         .setDisplaySize(
-          sd(Math.min(tw, (m.tab.h * 512) / 192)),
-          sd(Math.min(m.tab.h, (tw * 192) / 512)),
+          sd(Math.min(tw, (m.tab.h * t.img.width) / t.img.height)),
+          sd(Math.min(m.tab.h, (tw * t.img.height) / t.img.width)),
         );
       t.label
-        .setPosition(this.X(x0 + i * (tw + gap)), this.Y(145))
-        .setFontSize(Math.round(sd(26)))
+        .setPosition(this.X(x0 + i * (tw + gap)), this.Y(159))
+        .setFontSize(Math.round(sd(m.tab.h * 0.4)))
         .setColor(on ? THEME.gold : THEME.muted);
     });
 
@@ -190,38 +192,20 @@ export class Paytable {
 
   // ---- pages ----
 
+  /**
+   * Symbol pays as a grid of identical groups (icon, counts, amounts). Every group has the width
+   * of the widest one, so icons and columns line up; a partial last row is centered; the grid is
+   * centered vertically between the tabs and the footer.
+   */
   private pays() {
     const m = this.m();
     const lineBet = this.bet / NUM_LINES;
     const cols = m.payCols;
     const rows = Math.ceil(PAY_ORDER.length / cols);
-    const pad = 50;
-    const cw = (m.w - pad * 2) / cols;
-    const ch = Math.min((m.h - TOP - 110) / rows, 300);
-    PAY_ORDER.forEach((id, i) => {
-      const cx = pad + (i % cols) * cw + cw / 2;
-      const cy = TOP + 20 + Math.floor(i / cols) * ch + ch / 2;
-      const size = Math.min(ch * 0.62, cw * 0.4, 150);
-      this.image(id, cx - cw * 0.2, cy, size);
-      const pays = PAYTABLE[id];
-      for (let k = 0; k < 3; k++) {
-        const count = 5 - k;
-        const y = cy + (k - 1) * size * 0.36;
-        this.text(cx + cw * 0.02, y, `${count}`, 30, THEME.muted, 0);
-        this.text(
-          cx + cw * 0.1,
-          y,
-          formatMoney(pays[2 - k] * lineBet),
-          32,
-          THEME.text,
-          0,
-          cw * 0.36,
-        );
-      }
-    });
-    this.text(
+    const cw = (m.w - 100) / cols;
+    const footer = this.text(
       m.w / 2,
-      m.h - 60,
+      0,
       `Pays for a total bet of ${formatMoney(this.bet)} (line bet ${formatMoney(lineBet)}). ` +
         `WILD substitutes on all lines.`,
       26,
@@ -229,6 +213,44 @@ export class Paytable {
       0.5,
       m.w - 100,
     );
+    const footerH = this.refH(footer);
+    footer.setY(this.Y(m.h - BOTTOM - footerH / 2));
+    const bottom = m.h - BOTTOM - footerH - GAP;
+    const ch = Math.min((bottom - TOP) / rows, 300);
+    const size = Math.min(ch * 0.62, cw * 0.4, 150 * m.text);
+    const step = Math.max(size * 0.36, 40 * m.text);
+    const items = PAY_ORDER.map((id) => ({
+      icon: this.image(id, 0, 0, size),
+      lines: [0, 1, 2].map((k) => ({
+        count: this.text(0, 0, `${5 - k}`, 30, THEME.muted, 0),
+        pay: this.text(
+          0,
+          0,
+          formatMoney(PAYTABLE[id][2 - k] * lineBet),
+          32,
+          THEME.text,
+          0,
+          cw * 0.36,
+        ),
+      })),
+    }));
+    const all = items.flatMap((it) => it.lines);
+    const countW = Math.max(...all.map((l) => this.refW(l.count)));
+    const payW = Math.max(...all.map((l) => this.refW(l.pay)));
+    const w = size + 28 + countW + 14 + payW;
+    const y0 = TOP + (bottom - TOP - rows * ch) / 2;
+    items.forEach((it, i) => {
+      const row = Math.floor(i / cols);
+      const inRow = Math.min(cols, PAY_ORDER.length - row * cols);
+      const left = m.w / 2 + ((i % cols) - (inRow - 1) / 2) * cw - w / 2;
+      const cy = y0 + row * ch + ch / 2;
+      it.icon.setPosition(this.X(left + size / 2), this.Y(cy));
+      it.lines.forEach((l, k) => {
+        const y = this.Y(cy + (k - 1) * step);
+        l.count.setPosition(this.X(left + size + 28), y);
+        l.pay.setPosition(this.X(left + size + 28 + countW + 14), y);
+      });
+    });
   }
 
   private features() {
@@ -265,15 +287,31 @@ export class Paytable {
           `If both features trigger together, Free Spins is awarded.`,
       },
     ];
-    const bh = (m.h - TOP - 60) / blocks.length;
-    blocks.forEach((b, i) => {
-      const cy = TOP + 20 + i * bh + bh / 2;
-      const size = Math.min(bh * 0.6, 150);
-      this.image(b.id, 60 + size / 2, cy, size);
-      const tx = 60 + size + 40;
-      this.text(tx, cy - bh * 0.32, b.title, 38, THEME.gold, 0);
-      this.text(tx, cy - bh * 0.32 + 34, b.body, 27, THEME.text, 0, m.w - tx - 60).setOrigin(0, 0);
+    // Each block is as tall as its icon or its text, whichever is taller. Blocks are spaced
+    // evenly (equal gaps above, between and below) and each icon centers on its own text.
+    const bottom = m.h - BOTTOM;
+    const size = Math.min(((bottom - TOP) / blocks.length) * 0.6, 150 * m.text);
+    const tx = 60 + size + 40;
+    const built = blocks.map((b) => {
+      const icon = this.image(b.id, 60 + size / 2, 0, size);
+      const title = this.text(tx, 0, b.title, 38, THEME.gold, 0);
+      const body = this.text(tx, 0, b.body, 27, THEME.text, 0, m.w - tx - 60).setOrigin(0, 0);
+      const titleH = this.refH(title);
+      const textH = titleH / 2 + 34 * m.text + this.refH(body);
+      return { icon, title, body, titleH, textH, h: Math.max(size, textH) };
     });
+    const gap = Math.max(
+      0,
+      (bottom - TOP - built.reduce((a, b) => a + b.h, 0)) / (built.length + 1),
+    );
+    let y = TOP + gap;
+    for (const b of built) {
+      const top = y + (b.h - b.textH) / 2;
+      b.title.setY(this.Y(top + b.titleH / 2));
+      b.body.setY(this.Y(top + b.titleH / 2 + 34 * m.text));
+      b.icon.setY(this.Y(y + b.h / 2));
+      y += b.h + gap;
+    }
   }
 
   private lines() {
@@ -282,14 +320,18 @@ export class Paytable {
     const rows = Math.ceil(PAYLINES.length / cols);
     const pad = 40;
     const cw = (m.w - pad * 2) / cols;
-    const ch = (m.h - TOP - 40) / rows;
-    const c = Math.min((cw - 24) / REELS, (ch - 46) / ROWS); // mini cell size
+    const ch = (m.h - BOTTOM - TOP) / rows;
+    const labelH = 22 * m.text;
+    const c = Math.min((cw - 24) / REELS, (ch - labelH - 24) / ROWS); // mini cell size
+    // label + mini grid, centered in each cell, so the top and bottom margins match
+    const inset = (ch - (labelH + 8 + c * ROWS)) / 2;
     const g = this.scene.add.graphics();
     this.content.add(g);
     PAYLINES.forEach((line, i) => {
       const gx = pad + (i % cols) * cw + (cw - c * REELS) / 2;
-      const gy = TOP + Math.floor(i / cols) * ch + 38;
-      this.text(gx + (c * REELS) / 2, gy - 18, `${i + 1}`, 22, THEME.muted);
+      const top = TOP + Math.floor(i / cols) * ch + inset;
+      const gy = top + labelH + 8;
+      this.text(gx + (c * REELS) / 2, top + labelH / 2, `${i + 1}`, 22, THEME.muted);
       for (let r = 0; r < REELS; r++) {
         for (let row = 0; row < ROWS; row++) {
           const on = line[r] === row;
@@ -304,21 +346,68 @@ export class Paytable {
     });
   }
 
+  /**
+   * Rules as titled sections (gold heading over its text) in rows of MODAL_LAYOUT.ruleCols, spaced
+   * evenly like Features: equal gaps above, between and below, with a faint gold divider in the
+   * middle of each inner gap.
+   */
   private rules() {
     const m = this.m();
-    const body = [
-      `${NUM_LINES} fixed paylines. Wins pay left to right on adjacent reels, starting from the leftmost reel. ` +
-        'Only the highest win per line is paid; wins on different lines are added together.',
-      `Maximum win is ${MAX_WIN_MULT.toLocaleString('en-US')}x the total bet per round. When it is reached, ` +
-        'the round ends immediately and any remaining feature play is forfeited.',
-      'TURBO speeds up the reels only; results and payouts are the same.',
-      'Interrupted rounds are restored and finished automatically when the game is reopened.',
-      `Theoretical return to player (RTP): ${gameConfig.rtpLabel}.`,
-      'Malfunction voids all pays and plays.',
-    ].join('\n\n');
-    this.text(70, TOP + 20, body, 30, THEME.text, 0, m.w - 140)
-      .setOrigin(0, 0)
-      .setLineSpacing(sd(6));
+    const sections = [
+      {
+        title: 'PAYLINES',
+        body:
+          `${NUM_LINES} fixed paylines. Wins pay left to right on adjacent reels, starting from the leftmost reel. ` +
+          'Only the highest win per line is paid; wins on different lines are added together.',
+      },
+      {
+        title: 'MAX WIN',
+        body:
+          `Maximum win is ${MAX_WIN_MULT.toLocaleString('en-US')}x the total bet per round. When it is reached, ` +
+          'the round ends immediately and any remaining feature play is forfeited.',
+      },
+      { title: 'TURBO', body: 'TURBO speeds up the reels only; results and payouts are the same.' },
+      {
+        title: 'INTERRUPTED ROUNDS',
+        body: 'Interrupted rounds are restored and finished automatically when the game is reopened.',
+      },
+      {
+        title: 'RETURN TO PLAYER',
+        body: `Theoretical return to player (RTP): ${gameConfig.rtpLabel}.`,
+      },
+      { title: 'MALFUNCTION', body: 'Malfunction voids all pays and plays.' },
+    ];
+    const cols = m.ruleCols;
+    const colGap = 80;
+    const w = m.w - 140;
+    const colW = (w - (cols - 1) * colGap) / cols;
+    const headGap = 6 * m.text;
+    const built = sections.map((sec, i) => {
+      const x = 70 + (i % cols) * (colW + colGap);
+      const title = this.text(x, 0, sec.title, 30, THEME.gold, 0).setOrigin(0, 0);
+      const body = this.text(x, 0, sec.body, 28, THEME.text, 0, colW).setOrigin(0, 0);
+      return { title, body, h: this.refH(title) + headGap + this.refH(body) };
+    });
+    // rows of `cols` sections, each row as tall as its tallest section
+    const rows: number[] = [];
+    built.forEach((b, i) => {
+      const r = Math.floor(i / cols);
+      rows[r] = Math.max(rows[r] ?? 0, b.h);
+    });
+    const bottom = m.h - BOTTOM;
+    const gap = Math.max(0, (bottom - TOP - rows.reduce((a, h) => a + h, 0)) / (rows.length + 1));
+    const g = this.scene.add.graphics().lineStyle(sd(2), THEME.frame, 0.35);
+    this.content.add(g);
+    let y = TOP + gap;
+    rows.forEach((h, r) => {
+      if (r > 0)
+        g.lineBetween(this.X(70), this.Y(y - gap / 2), this.X(70 + w), this.Y(y - gap / 2));
+      for (const b of built.slice(r * cols, r * cols + cols)) {
+        b.title.setY(this.Y(y));
+        b.body.setY(this.Y(y + this.refH(b.title) + headGap));
+      }
+      y += h + gap;
+    });
   }
 
   // ---- helpers (panel-local reference coordinates) ----
@@ -335,6 +424,15 @@ export class Paytable {
     return sy(this.m().y + y);
   }
 
+  /** Display size of a content object in reference units. */
+  private refW(o: Phaser.GameObjects.Text) {
+    return o.displayWidth / layout.s;
+  }
+
+  private refH(o: Phaser.GameObjects.Text) {
+    return o.displayHeight / layout.s;
+  }
+
   private image(id: SymbolId, x: number, y: number, size: number) {
     const img = this.scene.add
       .image(this.X(x), this.Y(y), symbolKey(id))
@@ -343,7 +441,7 @@ export class Paytable {
     return img;
   }
 
-  /** originX 0 = left aligned, 0.5 = centered. wrap > 0 wraps (or for single tokens, shrinks) to that width. */
+  /** size is scaled by the layout's text scale. originX 0 = left aligned, 0.5 = centered. wrap > 0 wraps (or for single tokens, shrinks) to that width. */
   private text(
     x: number,
     y: number,
@@ -356,10 +454,10 @@ export class Paytable {
     const t = this.scene.add
       .text(this.X(x), this.Y(y), s, { fontFamily: THEME.fonts.ui, color, fontStyle: 'bold' })
       .setOrigin(originX, 0.5)
-      .setFontSize(Math.round(sd(size)));
+      .setFontSize(Math.round(sd(size * this.m().text)));
     if (wrap > 0) {
       if (s.includes(' ')) t.setWordWrapWidth(sd(wrap), true);
-      else fitText(t, sd(size), sd(wrap));
+      else fitText(t, sd(size * this.m().text), sd(wrap));
     }
     this.content.add(t);
     return t;

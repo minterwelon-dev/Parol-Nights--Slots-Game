@@ -6,7 +6,7 @@ It records what is built, every decision that deviates from or extends the brief
 **Keep it current:** at the end of every completed step, update the relevant sections (status, decisions,
 file map, known issues, next steps) and the "Last updated" line. Phase checkboxes also live in `PROJECT_BRIEF.md`; tick them there too.
 
-_Last updated: 2026-10-13 — Typography Step 3 complete and checked; awaiting review before Step 4 full verification. Asset Stages 1–4 approved. Phase 5 deploy/video remain skipped._
+_Last updated: 2026-10-13 — Phase 5 delivery: gameplay video recorded, GitHub Pages workflow added; waiting for the repo URL to push and deploy._
 
 ---
 
@@ -193,7 +193,7 @@ bottom control panel, portrait panels, logo), **banner text fitting** in portrai
 - **Animations** (polish batch, all pooled / persistent tweens, all skip-safe):
   - Overlay fades: `fadeIn`/`fadeOut` in `src/game/fx.ts` (200/180 ms, kill prior tweens, fadeOut resets text scale). Used by FeatureOverlay, WinPresenter, Paytable, ErrorModal. Never delays logic.
   - Win cells: `WinLines` frames are 15 pooled tinted images (`UI.cellFrame`), **not Graphics**. Phaser re-tessellates Graphics every frame; the old 70-rounded-stroke Graphics cost ~36 ms/frame at 4x throttle on big wins. Avoid many-shape Graphics that stay on screen.
-  - Win symbols: winning symbols pulse to 1.06x (`setDisplaySize`) with a pooled gold glow (`UI.glow`) per cell; one persistent tween in `Reels`; `highlight(null)` restores sizes.
+  - Win symbols: superseded by `SymbolAnimator` (ANIMATION_SPEC Step 3, see the animation section).
   - Spin button: `SpinButton` class in `Hud.ts` = glow + disc (`UI.spin`) + arrow ring (`UI.spinArrow`, rotates while spinning) + stop square (`UI.stop`); breathing glow in Idle; press squash.
   - Motion blur: boot-generated smear textures (`blurKey(id)`, 13 stamps, no ctx.filter); a reel swaps above 60% speed (`BLUR_AT`), back to sharp at landing bounce.
   - H&W: coins drop + bounce + flash (pooled `flashes` per cell), jackpot coins loop a tinted sparkle, Grand plays a diagonal wave (`WAVE_MS`) before the banner; resume rebuild is instant.
@@ -208,6 +208,228 @@ bottom control panel, portrait panels, logo), **banner text fitting** in portrai
   - Press feedback: `press()` in `fx.ts` (dip to 88%, spring back) on every HUD button, mute, paytable tabs / close, error modal button; the spin button uses it too. Its rest scale is in layout units, so a resize mid-press still ends at the new size.
 - **Paytable modal**: tabs PAYS / FEATURES / LINES / RULES; all numbers from `src/math` (money at current bet). Only manual value: `gameConfig.rtpLabel` ('95.3%') — update from the simulation report.
 
+## ANIMATION_SPEC.md implementation (in progress)
+
+User decisions (2026-10-13): **full spec architecture** (`src/game/animation/*`, existing animation code
+moves into it step by step); animation values live in **`gameConfig.anim`** (not a separate
+`animationConfig.ts`, per AGENTS.md single-config rule); **spec values replace the tuned ones** as each
+step lands. If the user dislikes them, restore these previous tuned values:
+`win.lineDrawMs 250`, `win.countUpMs 900` (fixed), tier `countUpMs` 3500 / 5500 / 7500, win pulse 1.06
+with no pop (`Reels.WIN_GROW`), `timing.stopStaggerMs 160` / turbo 50, `timing.bounceMs 220` / `bounceAmp 0.14`,
+`timing.anticipationMs 1300` / turbo 650, camera shake 0.006 for 350 ms (`WinPresenter.SHAKE*`).
+Shake drops to the spec cap (<= 0.004, <= 300 ms) regardless: it is a comfort / photosensitivity limit.
+
+Build order (spec section 17): 1 foundation · 2 reels · 3 symbol states + win presentation · 4 anticipation +
+trigger · 5 particles + big win · 6 Free Spins + Hold & Win · 7 ambient + HUD · 8 polish / throttled FPS · 9 optional Level 1 / Spine.
+
+**Step 1 done:** `gameConfig.anim` (spec section 4 values, turbo factor 0.45 / particles 0.5, reduced fade
+150 ms, shake and flash caps). `src/game/animation/AnimationHandle.ts` (Phaser-free: `done`, `finish()`,
+`cancel()`, `complete()`, `AnimationHandle.all()`; asserted in `npm run check`). `AnimationService.ts`
+(`dur()`, `count()`, `particleCap`, `tween()` / `counter()` / `delay()` returning handles, capped `shake()`,
+400 ms-gated `flash()`, `reduced` = player override ?? live `prefers-reduced-motion`, `ANIM_EVENTS` emitted on
+`scene.events`). `fxTextures.ts` generates `FX.glow / spark / ring / petal / coinDot` in BootScene. GameScene
+owns one service and forwards turbo. No module uses it yet, so nothing visible changed.
+ESLint: scripts may import `game/animation/AnimationHandle` only (narrow exception; other game imports still error).
+Hidden tab: Phaser already pauses its loop (all tweens) while hidden; nothing extra needed.
+**Note:** this machine has Windows animation effects off (`MinAnimate 0`), so Chrome here reports
+`prefers-reduced-motion: reduce`. Once modules honour it (from Step 2), local testing shows the reduced
+variant unless the override is used: `__game.scene.getScene('Game').anim.setReducedMotion(false)`.
+Verified: tsc, lint, prettier, 8 self-checks, build (no debug strings in dist), headless Chrome portrait 412x915
+and landscape 915x412: FX textures present, a spin returns to Idle, no warnings or errors; turbo `dur(1000)` = 450.
+
+**Step 2 done (reels):** reel motion moved out of `Reels.ts` into `src/game/animation/ReelAnimator.ts`; `Reels`
+keeps views, mask, frame, glow / vignette, win highlight and landing pops, and passes the animator a small
+`ReelView` callback set (shift, place, setBlur, snap, landed, tease). Values from `gameConfig.anim`:
+start kick 20 px over 120 ms with 40 ms per-reel stagger (`anim.reel.startStaggerMs`, added); stop stagger 180 ms
+(turbo 60); landing overshoot 12 px, settle 180 ms; spin-loop blur = existing smear texture plus container
+`scaleY 1.08` / `alpha 0.9`; anticipation slows the teased reel to 30% speed, glow stroke at `glowAlpha` 0.9 and a
+black 0.35 vignette (`anim.anticipation.vignetteAlpha`, added) over the other reels, total about 1400 ms (the slow
+landing counts toward it); quick stop snaps every reel with a known result straight onto the grid (no bounce).
+Turbo: `dur()` scales kick, landing and anticipation (0.45). Reduced motion: no kick, no overshoot, steady glow.
+`SpinTiming` now holds only `speed`, `accelMs`, `minSpinMs`; the old wind-up / bounce / stagger / anticipation
+fields are gone (previous values listed above for revert). `Reels.hooks` removed: GameScene plays sound from
+`spinStart`, `reelLanded`, `anticipationStart` on `scene.events`. Anticipation rule (`utils/anticipation.ts`) unchanged.
+Verified: tsc, lint, prettier, self-checks, both orientations in headless Chrome with full motion: land gaps
+150 to 200 ms (frame-quantized around 180), turbo about 60, quick stop 0; forced Free Spins anticipation about
+1.35 to 1.5 s with events `anticipationStart/End` in order; feature played through to Idle; reduced-motion spin;
+RGS failure halts to Error and recovers to Idle; no warnings, errors or landed-grid mismatches.
+Screenshots: scratchpad only (`anim-step2-*`), not committed. **User approved Step 2.**
+
+**Step 3 done (symbol states + win presentation):** `src/game/animation/SymbolAnimator.ts` owns per-cell states in one
+per-frame pass (no tweens, no allocations): idle sway +/-3 deg around the top pivot (1800 ms half-period) and
+breathe 1 -> 1.03 (2400 ms), phase offset `index * 120 ms`, only while the FSM is in Idle (GameScene fsm listener ->
+`reels.setIdle`); land squash scaleY 0.94 -> 1 over `dur(180)` (none on skip snap); win pop 1 -> 1.18 (260 ms
+Back.easeOut) blending into a 1.0 <-> 1.08 breathe (500 ms), glow alpha 0.3 -> 0.8, 3 sparkles per cycle, L1-L4 sway
+x1.6 while winning; dim to 0.35 over 150 ms. The SCATTER / COIN landing pop moved here from `Reels`. `SymbolView` now
+nests root (cell center: motion, scale, alpha) > pivot (top center: angle) > image. Reduced motion: no idle, pop, breathe,
+squash or sparkles; static glow 0.6; dim applies at once. `FxPool.ts` (pooled sparkle emitter per depth, capped at
+`particleCap`, visual randomness from `Phaser.Math.RND`) is reached through `anim.fx`.
+`WinPresenter` moved to `src/game/animation/WinPresenter.ts`: count-up `Cubic.easeOut`; normal wins 800 -> 1500 ms
+scaled by win / (15 x bet); tiers 3000 / 5000 / 7000 ms (`winTiers.countUpMs`); all through `dur()`, so turbo is x0.45;
+a 1.15 -> 1 settle pulse on the meter after every count-up and skip (`anim.countUp.settle*`); `countUpStart / End`
+and `winPop` events; camera shake now 0.004 / 300 ms via `anim.shake()`. `WinLines`: draw-in `dur(350)`, Idle cycle
+350 + 350 = 700 ms per line, glow stroke (soft 20 px pass under the 7 px line), `lineShown(line)` event, steady frames
+in reduced motion. During the presentation all lines still show at once (approved behaviour); one-by-one cycling stays
+in Idle. Removed `win.countUpMs`, `win.lineCycleMs`, `win.lineDrawMs` (now `anim.line` / `anim.countUp`).
+`Timeline.counter()` takes an optional ease. Not in this step: symbol specifics (7.2: H1 shine, H2 shimmer, WILD rays /
+shockwave, SCATTER jingle, COIN shine), trigger, big win extras.
+Verified (headless Chrome, both orientations, full motion): idle angles vary within +/-3 deg and are 0 while spinning;
+land squash sampled at 0.943 to 0.953; a normal win grew 5 to 7 cells and dimmed the rest, count-up 910 to 1195 ms;
+line cycle 700 ms; big win count-up 3004 ms, turbo 1355 ms; skip leaves the final amount and the meter mid-settle;
+up to 27 sparkles alive; reduced motion static; no warnings / errors (the dev total assertion stayed silent).
+Found and fixed during testing: `Phaser.Math.RND` is only set at game boot, so FxPool reads it at emit time.
+**User approved Step 3.**
+
+**Step 4 done (anticipation pulse, trigger, symbol specifics 7.2 Level 0):** all in `SymbolAnimator`, values in
+`gameConfig.anim.tease / trigger / symbols / burst / postFxMax`.
+- Anticipation: while a reel teases, visible SCATTER (and COIN when coins count) on landed reels pulse 1 -> 1.12 every
+  400 ms with a glow. `Reels.tease()` counts contributors on the landed reels with the same thresholds as
+  `utils/anticipation.ts`, so only symbols that make the trigger possible pulse.
+- Trigger: `Reels.trigger(id)` -> `SymbolAnimator.trigger(mask)` returns an `AnimationHandle` (first real handle user).
+  GameScene plays it before the feature intro (not when resuming mid-feature): SCATTER (Free Spins) or COIN (Hold & Win)
+  cells from the response grid pop to 1.2, spin 360 deg via `scaleX = cos`, 12-star burst; the rest dim; 1100 ms. Tap or
+  the spin button calls `finish()`; afterwards `clearLines()` restores the reels before the intro overlay.
+- Specifics: L1-L4 faster win sway (Step 3); H1 preFX shine every 4 s in Idle (one at a time), win = star burst + two
+  shine sweeps; H2 teal shimmer glow (alpha 0.1-0.25, 1.5 Hz) in Idle, teal win glow; H3 breathing glow in Idle, two
+  star bursts on win; WILD baked rays (`UI.rays`, behind the symbol at the reel-back depth) turning 20 deg/s in Idle and
+  40 deg/s while winning, core pulse 1 <-> 1.06, landing shockwave ring (0.2 -> 2.5, 450 ms) + star burst, a steady
+  sparkle stream while winning; SCATTER jingle +/-4 deg every 3 s, win shake +/-8 deg x3 at 40 ms; COIN shine every 3 s.
+- Post-FX budget: `anim.acquireFx()` / `releaseFx()`, max 3 (`postFxMax`); shines skip when the budget is used,
+  on Canvas (no preFX) and in reduced motion. All shines are removed at spin start.
+- Glows now use the white `FX.glow` texture tinted per symbol (gold `0xffc94a`, H2 teal).
+- `FxPool` gained `burst()` (12 stars, 80-220 px/s, 600 ms) and pooled `ring()` (6 per depth).
+- Reduced motion: no pulse, spin, shake, jingle, ray rotation, shockwave or shine; static glows and dim only; trigger
+  shortens to the 150 ms fade.
+Verified (headless Chrome, both orientations, full motion): WILD rays visible and turning, shockwave ring seen after
+landing; H2 / H3 idle glows on; forced Free Spins: tease scale 1.12 at pulse peak (1.27 when it overlaps the landing
+pop), trigger about 1.1 s plus polling, scaleX reached -1.19 (full flip); forced Hold & Win trigger tapped after 150 ms
+finished at once; reels fully undimmed in Idle after both features; post-FX never above 2; no warnings or errors.
+**User approved Step 4.**
+
+**Step 5 done (particles + big win overlay):** `WinPresenter` dressing per tier, values in `gameConfig.anim.bigWin`.
+Opening: dim (depth 20), rays (static in reduced motion), soft gold glow, and the logo ornament as the banner, scaling
+0.2 -> 1 (`Back.easeOut`, 400 ms); the tier title sits on the ornament's inner panel (`Title.PANEL`, now exported with
+`ASPECT`) and fits inside it. Tiers stack as the count-up escalates (`dress()`): BIG = sparkles around the banner every
+220 ms; MEGA adds 8 warm-tinted L-symbol lanterns rising over 3 s with a sway (pooled) and the coin shower (COIN art,
+40 over 2 s, gravity 400); EPIC adds one camera shake (0.004 / 300 ms, capped by the service), confetti petals
+(`FX.petal`, 30 over 2 s, gravity 250, 4 tints) and light bursts (star burst + ring at a random spot every 600 ms, no
+full-screen flash). Shake moved from MEGA+ to EPIC only, as the spec lists it. Closing stops every emitter and timer and
+fades lanterns; falling coins / petals finish their fall. `bigWinStart(tier)` / `bigWinEnd` events. Removed
+`winTiers[].shower` and `win.showerMs`. Reduced motion: banner, text, static rays and glow only.
+Particle cap: `FxPool.alive()` counts pooled and registered emitters; sparkles and bursts shrink to the room left
+under `particleCap`, so the cap is a hard limit. DEV: GameScene warns once if more than the cap are alive.
+Visual randomness uses `Phaser.Math.RND` (the old shower used `Phaser.Math.Between`, i.e. `Math.random`).
+Verified (headless Chrome, both orientations, full motion): forced BIG (banner at scale 1, sparkles, no coins), forced
+MEGA (18 coins, 8 lanterns mid-count), EPIC via a direct `presenter.present()` call (no force exists for >= 100x: shake
+ran at the tier change, coins 39, petals 19, light bursts); two taps close the overlay with nothing left visible; titles
+fit the banner panel; reduced motion added no new particles; peak alive 114 landscape / 88 portrait (cap 150), after a
+first run peaked at 156 and led to the hard cap; no warnings or errors.
+**User approved Step 5.**
+
+**Step 6 done (Free Spins + Hold & Win, spec section 9):** shared pieces in `src/game/animation/FeatureAnimations.ts`
+(`slideIn`, `flip`, `milestone`, pooled `StringLights` and `Pips`), values in `gameConfig.anim.feature`.
+`FeatureOverlay` takes the service; `step(..., style)` has `'intro'` (12-light lantern string lights left to right,
+title slides up 90 px with a tinted glow, the count pops 320 ms later) and `'drop'` (banner falls 260 px). Its bar takes
+optional respin pips; `flipBar()` flips a counter on its vertical axis then pops; `fly(..., onLand)`.
+Free Spins: intro style, `featureIntro('freeSpins')`; each raised multiplier emits `multiplierTick(n)` when the flyer
+lands, with a milestone (gold flash, 1.7 scale pulse, star burst) at x5 / x10 / x15; retrigger "+n" drops in and the
+spin counter flips; dish pop 300 ms; summary sparkles the served dishes in turn. The feast table keeps the approved
+progress-based fill (it does not add one dish per winning spin as the spec words it).
+Hold & Win: the bar reads `RESPINS` + 3 pips; a respin spends one (pop), a new coin refills all three with an 80 ms
+stagger (`respinReset`); coins drop and bounce, lock with a flash (`coinLocked`), then the plaque and value flip in on
+scaleX and the value pops; jackpot coins add a ring in their tier tint, a star burst and a gold flash on TOTAL
+(`jackpotReveal(tier)`); Grand adds one camera flash (`anim.flash`, gated by reduced motion and the 400 ms rule) to the
+wave; the summary first collects coin values one by one (260 ms, x0.85 per coin, floor 50 ms, skippable), then shows
+the response total and counts up as before (`featureSummary`). Reduced motion: lights static, no slide / drop / flip /
+milestone pulse / ring / flash, pips change at once.
+Verified (headless Chrome, both orientations, turbo on to shorten the run): forced retrigger round: intro lights 7 of 12
+lit after 400 ms, title glow on, multiplier ticks 2..7 (landscape) and 2..10 (portrait) in order, summary event;
+forced Grand: 3 pips with 2 lit after the first respin, values mid-flip at 0.97, 15 `coinLocked`, 9 `respinReset`,
+camera flash ran, 15 distinct TOTAL values during the collect, back to Idle; no warnings or errors (dev total assertions
+silent). Spent pip alpha raised from 0.18 to 0.35 after the screenshot review. No jackpot coin appeared in the forced
+rounds; a direct `holdAndWin.jackpot(7, 'major')` call showed the ring in the Major tint (`ff9cf0`), 12 stars and the
+`jackpotReveal:major` event, without errors.
+**User approved Step 6.**
+
+**Step 7 done (ambient background, HUD, reduced-motion toggle; spec section 10):**
+- `src/game/animation/AmbientBackground.ts`: 20 additive bokeh (`FX.glow`, warm tints) rising 60 px and fading over
+  7-12 s, 20 stars (`FX.spark`) twinkling in the top 42% with an alpha swing of 0.15 (photosensitivity limit), and a
+  +/-6 px, 12 s parallax on the painted background (`Background.setParallax`; the cover fit gained an 8 px margin so no
+  edge shows). Positions use an R2 low-discrepancy sequence: deterministic, no RNG. 40 objects, one per-frame pass.
+  Feature palette: an fsm listener tints the background toward `ambient.tints.freeSpins` / `holdAndWin` over 600 ms and
+  back to white in Idle. Reduced motion: everything static. Not done: lantern-string sway and string-light jitter.
+  Those lanterns are painted into the background art, so they need layered art (spec Level 1).
+- `src/game/animation/HudAnimations.ts` (`nudge`, `hover`) and `fx.pressBy()`. Spin button: idle glow pulse 0.5 -> 1.0
+  over 1200 ms (was 0.1 -> 0.35 / 1100), press 0.94 for 80 ms (other buttons keep the 0.88 / 220 ms press), disabled
+  alpha 0.5 (was 0.45), ring rotation and glow pulse off in reduced motion. Balance roll-up `Cubic.easeOut`. Bet value
+  nudges 1.18 -> 1 when it changes. Hover tint `0xfff0c0` on the HUD buttons, mute, motion and an active spin disc.
+- Reduced-motion toggle: a header button (`UI.motionOn / motionOff`, generated in BootScene: three speed lines, struck
+  out when reduced) left of mute in both orientations. `AnimationService.toggleReduced()` flips the effective setting
+  and stores it in `localStorage['parol-nights-motion']` ('1' / '0'; absent = follow the OS); read at startup, storage
+  errors ignored. Not part of the legacy-key migration (new key).
+Verified (headless Chrome, both orientations): 40 ambient objects, background x and bokeh alpha change over 0.9 s, stars
+within 0.45-0.60; spin glow samples 0.53 to 1.0; bet nudge 1.18; spin disc hover tint `fff0c0`, back to `ffffff` on
+leave; background tint `e2c8ff` during forced Free Spins and `ffffff` back in Idle; the motion button set reduced, icon
+`ui_motion_off`, stored '1', ambient static, and the choice survived a reload; no warnings or errors.
+**Step 7 revision (user feedback, 2026-10-13):** (1) bokeh was barely visible: new `FX.bokeh` texture (near-flat disc
+with a soft rim, reads as out-of-focus light; the soft `FX.glow` disappeared into the painted lights), 70-190 px, alpha
+0.55, drift 160 px. (2) Stars removed (they read as dust / speckles); `ambient.stars / starPx / starMs / starAlpha /
+flickerSwing / skyFraction` deleted. (3) Symbols jumped straight into mid-sway / mid-breathe when the machine entered
+Idle after a spin, and snapped from the win scale when a cycled line moved on: idle motion now fades in over
+`anim.idle.blendInMs` 600 ms (smoothstep weight per cell), and any cell leaving win / tease / trigger eases from its last
+scale and angle over `anim.idle.releaseMs` 300 ms (cubic out). Landing squash and feature pops are unchanged.
+Measured (headless Chrome, both orientations, full motion): the largest frame-to-frame change on settled cells after
+three spins and during the Idle line cycle was 0.04-0.17 deg (0.54 deg once, during the SCATTER jingle, which is a
+deliberate quick wiggle) and at most 0.010 in scale; no warnings or errors.
+**Note for local review:** this PC has Windows animation effects off, so Chrome reports `prefers-reduced-motion:
+reduce` and the game starts in reduced motion (no idle sway, static ambient). Use the header motion button (three lines)
+to switch to full motion; the choice is remembered.
+**Sparkle glints (replace the removed stars, user request 2026-10-13).** References: CSS glitter keyframes
+(scale 0.3 -> 1 -> 0.3 with a turn, opacity 0 -> 1 -> 0, then a rest; https://gist.github.com/zamboney/ed398efded1a88f5217682eef750776c),
+4-point concave star shape (https://www.techumber.com/amazing-glitter-star-effect-using-pure-css3), bright sparkles with
+diffraction spikes and twinkle cycles above 1.4 s (https://animationpatterns.art/animations/starlight-shimmer-text/).
+New `FX.glint` texture: soft white core, four long tapered spikes and four short diagonals. 7 glints
+(`anim.ambient.glints`), 60-130 px, warm-white tint, additive at background depth. Each shows for 1100 ms (grow 0.3 ->
+1 -> 0.3, turn 90 deg, fade in and out), then rests 2.6-7 s, and reappears at the next spot of an R2 sequence in the top
+45% of the screen, skipping the reel frame and the logo. On average 1.5 are visible at once. Hidden in reduced motion.
+Deviation to note: a glint fades fully in and out (one pulse, under 1 Hz, small area), unlike the 0.15 swing the spec
+sets for ambient light flicker; it is not a repeating flicker, but say if you want it capped.
+Verified (headless Chrome, both orientations): glints reach full alpha with the intended shape on the sky, average 1.5
+visible (6 for a moment as the phases line up), 0 in reduced motion; no warnings or errors.
+**User approved Step 7 (with the glints).**
+
+**Step 8 done (polish + QA, spec sections 16-17):**
+- Throttled FPS (412 x 915 / 915 x 412, DPR 2.625, 4x CPU, full motion, dev build): portrait idle 113.8 / spin 98.4 /
+  mega 93.0 / Free Spins 89.1 / Hold & Win 80.0 FPS; landscape 132.6 / 116.8 / 88.1 / 104.0 / 111.4. p95 frame
+  10-20 ms. Frames over 100 ms only occur in `Spinning` inside the dev forced-outcome seed scan (`forcePicker`; 2.98 s
+  for a forced mega win at 4x); unforced rounds have none. README Performance table updated.
+- Leaks: Idle tween count is 8 before and after big win, Free Spins and Hold & Win; post-FX back to 0.
+- Config: the remaining hard-coded presentation durations moved to `gameConfig.anim.timings` (values unchanged):
+  fx fades / text pop, land pop, tease glow, win-frame pulse, meter pulse, big win rays, light-burst ring, spin ring,
+  flyer, bar flash, string lights, pips, milestone, dish glow, coin drop / flash, jackpot glow, collect bump, shimmer,
+  Grand wave. Geometry fractions and particle speed ranges stay as named module constants.
+- Production: preview build in both orientations, one canvas, no debug hooks, no warnings or errors; dist has no
+  debug strings. Bundle: JS 1,325.0 KB raw / 364.0 KB gzip (+35 KB raw / +11 KB gzip over the pre-animation build);
+  total dist 1,996.7 KB / 1,000.7 KB (README updated).
+QA checklist status: FPS, post-FX <= 3, particle cap, skip end states (dev total assertion silent through tapped
+features), no tween leaks, turbo, reduced motion, flash gating, anticipation from the response only, reels land on the
+grid (dev assertion), hidden tab (Phaser pauses), both orientations, timings in config, events in order: all checked.
+Not checked: a physical Android / iOS device.
+Step 9 is optional: Level 1 layered symbol parts (needs new art via CODEX_ASSET_PROMPT.md) and a Spine trial (licence).
+
+**Title restyle (user request after Step 8, 2026-10-13; option "logo gold for all"):** FREE SPINS, HOLD & WIN, GRAND,
+the retrigger banner, the feature summaries and BIG / MEGA / EPIC WIN now use Cinzel Decorative 700 with the logo look:
+`goldTitle()` in `src/game/fx.ts` (gradient `THEME.titleGold` cream #fff3c4 -> gold #ffc94a -> amber #d9821e, navy
+stroke, outer glow), re-applied after every text / size change because the gradient spans the text's height. Tier glow
+(`WinPresenter.TIER_GLOW`): BIG gold #ff9f1c blur 18, MEGA parol red #e8402a blur 24, EPIC red blur 36 (reference px).
+Free Spins dropped pink / purple: title glow red, dim 0x170818 (navy-red), pill edge gold, ambient tint 0xffd6cc (was
+purple 0xe2c8ff). Hold & Win: gold glow. Amounts and counters stay Baloo 2, cream `THEME.amount` #fff6e0 on navy.
+`OverlayTheme.title` replaced by `glow`. Title stroke 14 -> 10 px (the glow carries the edge). docs/typography.md updated.
+Verified with screenshots in both orientations (big, mega, epic, Free Spins intro and summary, Hold & Win intro, Grand):
+titles fit the banner and screen, glow not clipped, no warnings or errors.
+Seen in passing (not changed): in portrait the Grand banner's hint "ALL 15 FILLED" overlaps the dimmed BALANCE / WIN
+panel (existing overlay layout).
+
 ## 4. File map (what lives where)
 
 ```
@@ -221,9 +443,12 @@ src/rgs/                    types, RGS (interface, InitResponse, RGSError), Mock
 src/state/SlotStateMachine.ts
 src/scenes/BootScene.ts     loading bar, generated symbol + UI textures (UI keys exported as `UI`; spinDisc/secondaryDisc helpers)
 src/scenes/GameScene.ts     wiring only: init/resume, round flow, presentRound, deferred load, sound hooks, modal guards
-src/game/                   Reels, Symbol, WinLines, WinPresenter, FeatureOverlay (shared feature chrome), FreeSpins, HoldAndWin,
+src/game/                   Reels, Symbol, WinLines, FeatureOverlay (shared feature chrome), FreeSpins, HoldAndWin,
                             Hud, ErrorModal, Paytable, SoundManager, DebugPanel (DEV),
                             fx (shared dimLayer(), pop(), press(), fadeIn(), fadeOut() helpers)
+src/game/animation/         AnimationHandle (Phaser-free), AnimationService (facade, turbo, reduced motion, events), fxTextures,
+                            ReelAnimator (spin / stop / anticipation / snap motion; Reels supplies the views),
+                            SymbolAnimator (idle / land / win / dim per cell), FxPool (pooled sparkles), WinPresenter
 src/utils/                  responsive (sx/sy/sd, cellX/cellY reel-cell centers, Layout), format (formatMoney), timeline,
                             anticipation, progress, fitText
 scripts/check.ts            assert-based self-checks: math, strips, eval, features, cap, MockRGS (replay/resume/failure/force/seed), fsm, anticipation
@@ -235,7 +460,7 @@ SKIPPED.md                  everything deliberately not done, with what it would
 Assets/audio/               8 placeholder MP3s (ffmpeg-synthesized, 96 kbps) + SOUND_MAP.txt (what plays when, how to swap)
 ```
 
-Module hooks for sound (wired in GameScene): `reels.hooks.{spin,land,tease}`, `presenter.onWin(big)`, `holdAndWin.onCoin`.
+Sound wiring (GameScene): `ANIM_EVENTS.spinStart / reelLanded / anticipationStart` on `scene.events`, `presenter.onWin(big)`, `holdAndWin.onCoin`.
 
 ## 5. How to run and verify
 
@@ -309,9 +534,37 @@ Evidence: `_review/art-browser.json`, `art-production.json`, `art-audit.json`, s
 `_review/art-*.png`. Procedural HUD icons, panels, feature boards and effects remain intentionally.
 No unresolved integration questions; separate settings/verify modals do not exist in this client.
 
+Art audit fixes (2026-10-13, uncommitted): see `docs/art-integration.md` > Audit fixes. Runtime
+backgrounds are baked with a slight blur and darker top band (`scripts/assets/runtime.py`, 35 KB each).
+Spin button: delivered disc plus generated navy/gold twin arrows and a red parol star (red/gold
+stop square while spinning; the ring turns). The three generated control layers are mapped in
+`src/theme/parolNights.ts`; existing procedural glyphs remain load-failure fallbacks. No spin,
+stop, game-state or animation timing logic changed in this replacement. Original PNGs and
+exact prompts are in `Assets/theme/parol-nights/source/spin-controls/` and
+`source/spin-controls-prompts.json`; packaging script `scripts/assets/spin_controls.py` logs
+alpha trim, uniform resize and padding. Added WebPs total 16,044 bytes. Build/type check, lint,
+self-checks and portrait/landscape browser checks pass (spin/stop/loading/disabled states and
+real spin/quick-stop back to Idle). Evidence: `_review/generated-controls-browser.json` and
+`_review/art-generated-controls-*.png`. Current working-tree dist: 1,961,723 raw / 989,676 gzip
+bytes, including earlier audit changes. Critical art: 439,238 landscape / 438,852 portrait bytes.
+Title ink is centered on the ornament's inner panel centroid.
+Corner buttons and paytable (tabs, text via `MODAL_LAYOUT.text`) are larger. Symbols fill 1.05 of the cell (art has a ~7.5% margin). Landscape reels
+are larger (frame max height 690, smaller logo, HUD lowered). Hold & Win values sit on the plaque art.
+Palette is navy/gold throughout (`THEME.stroke` navy, gold panel edges, navy modal panel). Turbo
+plaque is larger. Food icons now drive `src/game/FeastTable.ts`: six plates (landscape: three each
+side of the reels; portrait: a row below the controls) fill with dishes during Free Spins.
+The fill level is `floor(6 * played / (played + left))` from response counts, and it never drops.
+
 Parol Nights assets: Stages 1–4 approved; final delivery complete.
 All 23 exports delivered with manifest, source prompts, attribution, QA and four review sheets.
 Asset integration is covered by the current user request.
 
-Only the items in `SKIPPED.md`: deploy (then add the link to the README), gameplay video, and the optional Phase 4 stretch.
+Phase 5 delivery (user request, 2026-10-13): gameplay video `docs/media/gameplay.mp4` (39 s, 1280x720, H.264 CRF 26,
+6.8 MB, silent) recorded from the dev build with puppeteer `page.screencast` (ffmpeg-static in the session scratchpad,
+not a repo dependency): two base spins, the debug panel arming freeSpins, turbo on, Free Spins played through (taps
+fast-forward intros / summaries), then holdAndWin armed and played. GitHub Pages: `.github/workflows/pages.yml` (Node 22,
+`npm ci`, `npm run check`, `npm run build`, debug-string gate, upload + deploy-pages) on pushes to `main`. `_review/`
+(39 MB of local QA evidence) is git-ignored at the user's choice; docs still reference it locally. Branch plan: commit on
+feat/parol-assets, create `main` at the same commit, push both once the user creates the public repo.
+Remaining after that: the optional Phase 4 stretch items in `SKIPPED.md` and the optional ANIMATION_SPEC Step 9.
 Keep the README's bundle size and performance tables current when the client changes.

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "spin_arrows",
+    "file": "ui/spin_arrows.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 10094,
+    "role": "ui",
+    "source": "source/spin-controls/spin_arrows.png",
+    "sourceSha256": "f6afc58e99aa8c7070bf1923b6737b5f02490d14c08fa10384cf7b3b51fc4e32",
+    "operation": "Alpha bounds (19, 20, 1234, 1254); uniform fit to 156px; centered on transparent 256px canvas; WebP q90"
+  },
+  {
+    "id": "spin_star",
+    "file": "ui/spin_star.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 3822,
+    "role": "ui",
+    "source": "source/spin-controls/spin_star.png",
+    "sourceSha256": "771355bf9e41cec9e933fac02a51cfd3590d5188aae105b0deb474106ab94ec7",
+    "operation": "Alpha bounds (65, 63, 1206, 1237); uniform fit to 76px; centered on transparent 256px canvas; WebP q90"
+  },
+  {
+    "id": "stop_icon",
+    "file": "ui/stop_icon.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 2128,
+    "role": "ui",
+    "source": "source/spin-controls/stop_icon.png",
+    "sourceSha256": "f357695e117ab40146f7271e1d15205d62fdbac20d10aae8d04571c818028bf0",
+    "operation": "Alpha bounds (0, 13, 1238, 1254); uniform fit to 60px; centered on transparent 256px canvas; WebP q90"
+  }
+]

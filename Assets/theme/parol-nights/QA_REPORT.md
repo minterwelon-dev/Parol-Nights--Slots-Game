@@ -1,5 +1,17 @@
 # Parol Nights — Asset QA
 
+## Generated spin controls — ready for review
+
+2026-10-13: added three 256-square transparent WebPs, 16,044 bytes total, with preserved
+generated PNGs and exact prompts. All three load as images in portrait and landscape.
+The navy/gold twin arrows rotate during stop mode; the center swaps from a red parol star
+to a red/gold square. Loading hides both icon layers, disabled styling is preserved,
+and a real spin followed by quick-stop returns to Idle without warnings or exceptions.
+Build/type check, lint and existing tests pass. Screenshots and browser evidence:
+`_review/art-generated-controls-*.png`, `_review/generated-controls-browser.json`.
+The original 23 delivered assets remain unchanged by this control-icon task; manifest now
+contains 26 entries. Small marks are readable on the bright gold disc at tested mobile sizes.
+
 ## Final delivery — approved
 
 All four stages approved by the user. Final verification on 2026-10-13 passed

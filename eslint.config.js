@@ -9,7 +9,20 @@ export default [
     // math + scripts must stay Phaser/DOM free
     files: ['src/math/**', 'scripts/**'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: ['phaser', '**/scenes/*', '**/game/*'] }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            'phaser',
+            '**/scenes/*',
+            '**/game/*',
+            // AnimationHandle is Phaser-free; check.ts exercises it
+            '!**/game/animation',
+            '**/game/animation/*',
+            '!**/game/animation/AnimationHandle',
+          ],
+        },
+      ],
       'no-restricted-globals': ['error', 'window', 'document', 'localStorage'],
     },
   },

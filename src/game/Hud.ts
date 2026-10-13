@@ -5,7 +5,11 @@ import { gameConfig } from '../gameConfig';
 import { Title } from './Title';
 import { formatMoney } from '../utils/format';
 import { sd, sx, sy, type Layout } from '../utils/responsive';
-import { press } from './fx';
+import { press, pressBy } from './fx';
+import type { AnimationService } from './animation/AnimationService';
+import { hover, nudge } from './animation/HudAnimations';
+
+const HA = gameConfig.anim.hud;
 
 /** spin = ready, stop = tap to quick-stop, off = unavailable, loading = deferred assets pending */
 export type SpinMode = 'spin' | 'stop' | 'off' | 'loading';
@@ -17,6 +21,7 @@ export interface HudHandlers {
   turbo(): void;
   mute(): void;
   info(): void;
+  motion(): void;
 }
 
 const OFF_ALPHA = 0.35;
@@ -46,11 +51,12 @@ class Button {
     this.img.on('pointerdown', () => {
       if (!this.enabled) return;
       press(scene, this.img, this.label);
+      this.img.setTint(0xffe4a0); // before onPress: a press that disables the button sets grey
       onPress();
-      this.img.setTint(0xffe4a0);
     });
-    const release = () => this.img.setTint(this.enabled ? this.tint : 0x888899);
-    this.img.on('pointerup', release).on('pointerout', release);
+    const rest = () => (this.enabled ? this.tint : 0x888899);
+    this.img.on('pointerup', () => this.img.setTint(rest()));
+    hover(this.img, () => this.enabled, rest);
   }
 
   setEnabled(on: boolean) {
@@ -68,9 +74,10 @@ class Button {
 }
 
 /**
- * Layered spin button: breathing glow (ready), gold disc, arrow ring that rotates while the
- * reels spin, and a stop square inside the ring (tap = quick stop). All layers share one
- * 256 px source size, so they stack exactly at any display size.
+ * Layered spin button: breathing glow (ready), disc, a twin-arrow ring that turns while the reels
+ * spin, and a center mark: a parol star when ready, a stop square while spinning (tap = quick
+ * stop). Ring and marks hide behind the LOADING text. All layers are sized to one square, so they
+ * stack exactly at any display size.
  */
 class SpinButton {
   readonly disc: Phaser.GameObjects.Image;
@@ -79,17 +86,21 @@ class SpinButton {
   private mark: Phaser.GameObjects.Image;
   private breathe: Phaser.Tweens.Tween;
   private turn: Phaser.Tweens.Tween;
+  private mode: SpinMode = 'off';
 
-  constructor(private scene: Phaser.Scene) {
+  constructor(
+    private scene: Phaser.Scene,
+    private anim: AnimationService,
+  ) {
     const img = (key: string) => scene.add.image(0, 0, key).setDepth(DEPTH.HUD);
     this.glow = img(UI.glow).setVisible(false);
     this.disc = img(UI.spin).setInteractive({ useHandCursor: true });
     this.arrow = img(UI.spinArrow);
-    this.mark = img(UI.stop).setVisible(false);
+    this.mark = img(UI.spinStar);
     this.breathe = scene.tweens.add({
       targets: this.glow,
-      alpha: { from: 0.2, to: 0.65 },
-      duration: 1100,
+      alpha: { from: HA.glowMin, to: HA.glowMax },
+      duration: HA.glowMs,
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1,
@@ -99,7 +110,7 @@ class SpinButton {
     this.turn = scene.tweens.add({
       targets: this.arrow,
       angle: 360,
-      duration: 750,
+      duration: gameConfig.anim.timings.spinRingTurnMs,
       repeat: -1,
       paused: true,
       persist: true,
@@ -107,28 +118,48 @@ class SpinButton {
   }
 
   setMode(mode: SpinMode) {
+    this.mode = mode;
     const live = mode === 'spin' || mode === 'stop';
-    const a = live ? 1 : 0.45;
-    this.disc.setAlpha(a).setTint(live ? (mode === 'stop' ? 0xffe4a0 : 0xffffff) : 0x888899);
-    this.arrow.setAlpha(a);
-    this.mark.setVisible(mode === 'stop');
-    if (mode === 'stop') this.turn.restart();
+    const a = live ? 1 : HA.disabledAlpha;
+    this.disc.setAlpha(a).setTint(this.restTint());
+    const icon = mode !== 'loading';
+    this.arrow.setAlpha(a).setVisible(icon);
+    this.mark
+      .setTexture(mode === 'stop' ? UI.stop : UI.spinStar)
+      .setAlpha(a)
+      .setVisible(icon);
+    // reduced motion: no looping rotation or pulse; the ring and glow stay still
+    const reduced = this.anim.reduced;
+    if (mode === 'stop' && !reduced) this.turn.restart();
     else {
       this.turn.pause();
       this.arrow.setAngle(0);
     }
     this.glow.setVisible(mode === 'spin');
-    if (mode === 'spin') this.breathe.resume();
-    else this.breathe.pause();
+    if (mode === 'spin' && !reduced) this.breathe.resume();
+    else {
+      this.breathe.pause();
+      this.glow.setAlpha((HA.glowMin + HA.glowMax) / 2);
+    }
+  }
+
+  /** Disc tint for the current mode (hover returns here). */
+  restTint() {
+    const live = this.mode === 'spin' || this.mode === 'stop';
+    return live ? (this.mode === 'stop' ? 0xffe4a0 : 0xffffff) : 0x888899;
+  }
+
+  get live() {
+    return this.mode === 'spin' || this.mode === 'stop';
   }
 
   squash() {
-    press(this.scene, this.disc, this.arrow, this.mark);
+    pressBy(this.scene, HA.pressDip, HA.pressMs, [this.disc, this.arrow, this.mark]);
   }
 
   place(x: number, y: number, size: number) {
     for (const o of [this.glow, this.disc, this.arrow, this.mark]) o.setPosition(x, y);
-    this.glow.setDisplaySize(size * 1.5, size * 1.5);
+    this.glow.setDisplaySize(size * 1.3, size * 1.3);
     this.disc.setDisplaySize(size, size);
     this.arrow.setDisplaySize(size, size);
     this.mark.setDisplaySize(size, size);
@@ -148,6 +179,7 @@ export class Hud {
   private betUp: Button;
   private turboBtn: Button;
   private muteBtn: Phaser.GameObjects.Image;
+  private motionBtn: Phaser.GameObjects.Image;
   private infoBtn: Button;
   private panel: Phaser.GameObjects.Graphics;
   private logo: Title;
@@ -166,11 +198,17 @@ export class Hud {
   constructor(
     private scene: Phaser.Scene,
     h: HudHandlers,
+    private anim: AnimationService,
   ) {
     this.panel = scene.add.graphics().setDepth(DEPTH.HUD);
     this.logo = new Title(scene);
 
-    this.spinBtn = new SpinButton(scene);
+    this.spinBtn = new SpinButton(scene, anim);
+    hover(
+      this.spinBtn.disc,
+      () => this.spinBtn.live,
+      () => this.spinBtn.restTint(),
+    );
     const spin = () => {
       if (this.mode !== 'spin' && this.mode !== 'stop') return;
       this.spinBtn.squash();
@@ -190,6 +228,24 @@ export class Hud {
       press(scene, this.muteBtn);
       h.mute();
     });
+    hover(
+      this.muteBtn,
+      () => true,
+      () => 0xffffff,
+    );
+    this.motionBtn = scene.add
+      .image(0, 0, UI.motionOn)
+      .setDepth(DEPTH.HUD)
+      .setInteractive({ useHandCursor: true });
+    this.motionBtn.on('pointerdown', () => {
+      press(scene, this.motionBtn);
+      h.motion();
+    });
+    hover(
+      this.motionBtn,
+      () => true,
+      () => 0xffffff,
+    );
     this.infoBtn = new Button(scene, UI.round, 'i', THEME.gold, h.info);
     this.infoBtn.label.setFontFamily(THEME.fonts.ui).setFontStyle('bold');
 
@@ -230,7 +286,7 @@ export class Hud {
       from,
       to: minor,
       duration: gameConfig.win.balanceCountMs,
-      ease: 'Sine.easeOut',
+      ease: 'Cubic.easeOut',
       onUpdate: (t) => this.balance.setText(formatMoney(Math.floor(t.getValue() ?? minor))),
       onComplete: () => this.balance.setText(formatMoney(minor)),
     });
@@ -238,7 +294,10 @@ export class Hud {
 
   /** canDown / canUp: bet level exists and bet changes are allowed right now */
   setBet(minor: number, canDown: boolean, canUp: boolean) {
-    this.betValue.setText(minor > 0 ? formatMoney(minor) : '-');
+    const text = minor > 0 ? formatMoney(minor) : '-';
+    if (minor > 0 && this.betValue.text !== '-' && this.betValue.text !== text)
+      nudge(this.scene, this.anim, this.betValue);
+    this.betValue.setText(text);
     this.betDown.setEnabled(canDown);
     this.betUp.setEnabled(canUp);
   }
@@ -252,7 +311,13 @@ export class Hud {
     this.muteBtn.setTexture(muted ? UI.soundOff : UI.soundOn);
   }
 
-  /** ON: solid gold pill, dark text. OFF: outlined pill, muted text. Always pressable. */
+  /** Motion toggle icon; the spin button re-applies its loops for the new setting. */
+  setReducedMotion(reduced: boolean) {
+    this.motionBtn.setTexture(reduced ? UI.motionOff : UI.motionOn);
+    this.spinBtn.setMode(this.mode);
+  }
+
+  /** ON: warm-tinted plaque, gold text. OFF: cool-tinted plaque, muted text. Always pressable. */
   setTurbo(on: boolean) {
     this.turboOn = on;
     this.turboBtn.tint = on ? 0xffdf80 : 0xb0b0c8;
@@ -300,6 +365,10 @@ export class Hud {
 
     this.muteBtn
       .setPosition(sx(p.mute.x), sy(p.mute.y))
+      .setDisplaySize(sd(p.mute.size), sd(p.mute.size));
+    // motion toggle sits just inside the mute button
+    this.motionBtn
+      .setPosition(sx(p.mute.x - p.mute.size * 1.2), sy(p.mute.y))
       .setDisplaySize(sd(p.mute.size), sd(p.mute.size));
     const inf = p.info;
     this.infoBtn.place(sx(inf.x), sy(inf.y), sd(inf.size), sd(inf.size), sd(inf.size * 0.62));

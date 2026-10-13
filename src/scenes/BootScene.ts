@@ -2,20 +2,14 @@ import Phaser from 'phaser';
 import { DEPTH, RELAYOUT, THEME } from '../constants';
 import { Title } from '../game/Title';
 import { Background } from '../game/Background';
-import {
-  ART as ASSETS,
-  UI,
-  symbolKey,
-  blurKey,
-  criticalArt,
-  warnMissing,
-} from '../theme/parolNights';
+import { makeFxTextures } from '../game/animation/fxTextures';
+import { ART, UI, symbolKey, blurKey, criticalArt, warnMissing } from '../theme/parolNights';
 export { UI, symbolKey, blurKey } from '../theme/parolNights';
 import type { SymbolId } from '../rgs/types';
 import { layout, sd, sx, sy } from '../utils/responsive';
 
-/** Source size of generated symbol textures (px). Displayed via setDisplaySize(sd()). */
-export const SYMBOL_TEX = 256;
+/** Source size of generated placeholder symbol textures (px). */
+const SYMBOL_TEX = 256;
 
 interface Art {
   bg: [string, string];
@@ -25,8 +19,8 @@ interface Art {
   round?: boolean;
 }
 
-// Placeholder art. Swap for WebP later by loading textures under the same keys.
-const ART: Record<SymbolId, Art> = {
+// Generated stand-ins, used only for symbols whose delivered WebP fails to load.
+const PLACEHOLDER: Record<SymbolId, Art> = {
   L1: { bg: ['#3b6fd6', '#1b2f66'], label: 'J', color: '#e6efff', size: 150 },
   L2: { bg: ['#36a85a', '#14462a'], label: 'Q', color: '#e6ffe9', size: 150 },
   L3: { bg: ['#8a4fd6', '#3a1b66'], label: 'K', color: '#f1e6ff', size: 150 },
@@ -72,8 +66,7 @@ export class BootScene extends Phaser.Scene {
       this.game.events.off(RELAYOUT, placeBackground),
     );
     this.load.on(Phaser.Loader.Events.FILE_COMPLETE, (key: string) => {
-      if (key === ASSETS.landscape.key || key === ASSETS.portrait.key)
-        background = new Background(this);
+      if (key === ART.landscape.key || key === ART.portrait.key) background = new Background(this);
     });
     const title = new Title(this);
     const placeTitle = () => title.place(layout.w / 2, layout.h / 2 - 220, 1000, 92);
@@ -113,6 +106,7 @@ export class BootScene extends Phaser.Scene {
   create() {
     this.refreshSymbolTextures();
     this.makeUiTextures();
+    makeFxTextures(this);
     this.ensureArtFallbacks(this.critical);
     this.scene.start('Game');
   }
@@ -120,8 +114,8 @@ export class BootScene extends Phaser.Scene {
   /** Redraw cached placeholder labels if fonts finish after the startup timeout. */
   refreshSymbolTextures() {
     const S = SYMBOL_TEX;
-    for (const id in ART) {
-      const a = ART[id as SymbolId];
+    for (const id in PLACEHOLDER) {
+      const a = PLACEHOLDER[id as SymbolId];
       const key = symbolKey(id as SymbolId);
       if (
         this.textures.exists(key) &&
@@ -169,8 +163,8 @@ export class BootScene extends Phaser.Scene {
     for (const { key } of items) {
       if (this.textures.exists(key)) continue;
       warnMissing(key);
-      const frame = key === ASSETS.frame.key;
-      const logo = key === ASSETS.logo.key;
+      const frame = key === ART.frame.key;
+      const logo = key === ART.logo.key;
       const w = frame ? 1700 : logo ? 768 : 32;
       const h = frame ? 1100 : logo ? 288 : 32;
       this.canvasTex(key, w, h, (ctx) => {
@@ -213,16 +207,20 @@ export class BootScene extends Phaser.Scene {
     tex.refresh();
   }
 
-  /** Vertical motion smear of each symbol: the source stamped at small offsets (no ctx.filter, iOS-safe). */
+  /**
+   * Vertical motion smear of each symbol at its source size: the source stamped at small offsets
+   * (no ctx.filter, iOS-safe). Offsets scale with the source so delivered and placeholder art match.
+   */
   private makeBlurTextures() {
-    const S = SYMBOL_TEX;
-    for (const id in ART) {
+    for (const id in PLACEHOLDER) {
       const src = this.textures
         .get(symbolKey(id as SymbolId))
         .getSourceImage() as HTMLCanvasElement;
+      const S = src.width;
+      const step = S / 256;
       this.canvasTex(blurKey(id as SymbolId), S, S, (ctx) => {
         ctx.globalAlpha = 0.17;
-        for (let dy = -18; dy <= 18; dy += 3) ctx.drawImage(src, 0, dy, S, S);
+        for (let dy = -18; dy <= 18; dy += 3) ctx.drawImage(src, 0, dy * step, S, S);
       });
     }
   }
@@ -234,36 +232,32 @@ export class BootScene extends Phaser.Scene {
       ctx.fillRect(0, 0, 4, 4);
     });
 
-    // spin button layers (same 256 canvas so they stack exactly): disc, arrow ring, stop mark
+    // spin button layers (same 256 canvas so they stack exactly): disc, twin-arrow ring, and a
+    // center mark: a parol star (ready) or a stop square (spinning). Sized to sit inside the orb.
     this.canvasTex(UI.spin, 256, 256, spinDisc);
     this.canvasTex(UI.spinArrow, 256, 256, (ctx) => {
-      const c = 128;
-      const R = 58;
-      const a0 = -Math.PI / 2 + 0.45; // just right of 12 o'clock
-      const a1 = a0 + Math.PI * 1.55; // clockwise, ends left of 12 o'clock
-      ctx.strokeStyle = ctx.fillStyle = ICON;
-      ctx.lineWidth = 22;
-      ctx.lineCap = 'round';
+      // cream halo first, then navy on top, so the icon reads on the bright orb
+      for (const [color, grow] of [
+        [ICON_EDGE, 7],
+        [ICON, 0],
+      ] as const) {
+        ctx.strokeStyle = ctx.fillStyle = color;
+        ctx.lineCap = ctx.lineJoin = 'round';
+        for (let k = 0; k < 2; k++) twinArrow(ctx, -Math.PI / 2 + 0.4 + k * Math.PI, grow);
+      }
+    });
+    this.canvasTex(UI.spinStar, 256, 256, (ctx) => {
       ctx.beginPath();
-      ctx.arc(c, c, R, a0, a1);
-      ctx.stroke();
-      // arrow head on the arc end, pointing along the clockwise tangent
-      const px = c + R * Math.cos(a1);
-      const py = c + R * Math.sin(a1);
-      const tx = -Math.sin(a1); // tangent
-      const ty = Math.cos(a1);
-      const nx = Math.cos(a1); // radial
-      const ny = Math.sin(a1);
-      ctx.beginPath();
-      ctx.moveTo(px + tx * 34, py + ty * 34);
-      ctx.lineTo(px + nx * 30 - tx * 6, py + ny * 30 - ty * 6);
-      ctx.lineTo(px - nx * 30 - tx * 6, py - ny * 30 - ty * 6);
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? 14 : 34;
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        ctx.lineTo(128 + r * Math.cos(a), 128 + r * Math.sin(a));
+      }
       ctx.closePath();
-      ctx.fill();
+      iconFill(ctx);
     });
     // secondary round button (bet - / +): dark disc, gold ring; glyph drawn as Text on top
     this.canvasTex(UI.round, 128, 128, secondaryDisc);
-    // Hold & Win coin without the $ so its value can sit on top; jackpots tint it
     // soft gold glow behind winning symbols
     this.canvasTex(UI.glow, 256, 256, (ctx) => {
       const g = ctx.createRadialGradient(128, 128, 20, 128, 128, 128);
@@ -289,24 +283,6 @@ export class BootScene extends Phaser.Scene {
         ctx.closePath();
         ctx.fill();
       }
-    });
-    this.canvasTex(UI.coin, 256, 256, (ctx) => {
-      const g = ctx.createRadialGradient(100, 90, 10, 128, 128, 120);
-      g.addColorStop(0, '#fff4c2');
-      g.addColorStop(0.6, '#f2b437');
-      g.addColorStop(1, '#a8650b');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(128, 128, 114, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.lineWidth = 10;
-      ctx.strokeStyle = '#ffe9b0';
-      ctx.stroke();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(122,74,0,0.6)';
-      ctx.beginPath();
-      ctx.arc(128, 128, 92, 0, Math.PI * 2);
-      ctx.stroke();
     });
     // mute toggle: secondary disc with a speaker, sound waves (on) or a cross (off)
     for (const on of [true, false]) {
@@ -344,11 +320,39 @@ export class BootScene extends Phaser.Scene {
         ctx.stroke();
       });
     }
+    // motion toggle: secondary disc with three speed lines (full motion) or a struck-out set (reduced)
+    for (const on of [true, false]) {
+      this.canvasTex(on ? UI.motionOn : UI.motionOff, 128, 128, (ctx) => {
+        ctx.drawImage(
+          this.textures.get(UI.round).getSourceImage() as HTMLImageElement,
+          0,
+          0,
+          128,
+          128,
+        );
+        ctx.strokeStyle = on ? '#ffd34d' : '#b8916c';
+        ctx.lineWidth = 7;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (const [y, x0] of [
+          [46, 40],
+          [64, 30],
+          [82, 40],
+        ]) {
+          ctx.moveTo(x0, y);
+          ctx.lineTo(92, y);
+        }
+        if (!on) {
+          ctx.moveTo(38, 92);
+          ctx.lineTo(92, 36);
+        }
+        ctx.stroke();
+      });
+    }
     // small stop square that sits inside the (rotating) arrow ring while the reels spin
     this.canvasTex(UI.stop, 256, 256, (ctx) => {
-      ctx.fillStyle = ICON;
-      roundRect(ctx, 101, 101, 54, 54, 10);
-      ctx.fill();
+      roundRect(ctx, 104, 104, 48, 48, 10);
+      iconFill(ctx);
     });
 
     // generic button and modal panel
@@ -369,17 +373,57 @@ export class BootScene extends Phaser.Scene {
       ctx.stroke();
     });
     this.canvasTex(UI.panel, 800, 450, (ctx) => {
-      ctx.fillStyle = '#26130e';
+      ctx.fillStyle = '#0b1033';
       roundRect(ctx, 4, 4, 792, 442, 40);
       ctx.fill();
       ctx.lineWidth = 6;
-      ctx.strokeStyle = '#f0a640';
+      ctx.strokeStyle = '#e8b23a';
       ctx.stroke();
     });
   }
 }
 
-const ICON = '#4a1f00';
+const ICON = '#0b1033';
+const ICON_EDGE = '#fff3c4';
+const ICON_RED = '#c8102e';
+
+/** Lantern-red fill with a navy edge and cream halo: the spin button's center marks. */
+function iconFill(ctx: CanvasRenderingContext2D) {
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 16;
+  ctx.strokeStyle = ICON_EDGE;
+  ctx.stroke();
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = ICON;
+  ctx.stroke();
+  ctx.fillStyle = ICON_RED;
+  ctx.fill();
+}
+
+/** One of the two clockwise arrows of the spin ring: a 140-degree arc from a0 with a head. */
+function twinArrow(ctx: CanvasRenderingContext2D, a0: number, grow: number) {
+  const c = 128;
+  const R = 54;
+  const a1 = a0 + Math.PI - 0.8;
+  ctx.lineWidth = 15 + grow;
+  ctx.beginPath();
+  ctx.arc(c, c, R, a0, a1);
+  ctx.stroke();
+  const px = c + R * Math.cos(a1);
+  const py = c + R * Math.sin(a1);
+  const tx = -Math.sin(a1); // clockwise tangent
+  const ty = Math.cos(a1);
+  const nx = Math.cos(a1); // radial
+  const ny = Math.sin(a1);
+  ctx.lineWidth = grow;
+  ctx.beginPath();
+  ctx.moveTo(px + tx * 26, py + ty * 26);
+  ctx.lineTo(px + nx * 19 - tx * 4, py + ny * 19 - ty * 4);
+  ctx.lineTo(px - nx * 19 - tx * 4, py - ny * 19 - ty * 4);
+  ctx.closePath();
+  ctx.fill();
+  if (grow) ctx.stroke();
+}
 
 /** Dark disc with a gold ring (128 px): secondary buttons (bet -/+, mute, info, close). */
 function secondaryDisc(ctx: CanvasRenderingContext2D) {

@@ -36,14 +36,20 @@ export class Timeline {
   }
 
   /** Number tween from -> to; onUpdate receives the current value. */
-  counter(from: number, to: number, ms: number, onUpdate: (v: number) => void): Promise<void> {
+  counter(
+    from: number,
+    to: number,
+    ms: number,
+    onUpdate: (v: number) => void,
+    ease = 'Sine.easeOut',
+  ): Promise<void> {
     if (this.skipping || ms <= 0) return Promise.resolve();
     return new Promise((resolve) => {
       const tween = this.scene.tweens.addCounter({
         from,
         to,
         duration: ms,
-        ease: 'Sine.easeOut',
+        ease,
         onUpdate: (t) => onUpdate(t.getValue() ?? to),
         onComplete: () => finish(),
       });

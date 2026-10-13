@@ -115,10 +115,10 @@
     "file": "runtime/bg/bg_landscape.webp",
     "width": 1280,
     "height": 720,
-    "bytes": 105506,
+    "bytes": 34960,
     "quality": 80,
     "method": 6,
-    "operation": "Lanczos resize only"
+    "operation": "Lanczos resize, Gaussian blur 3.0, top 45% darkened up to 30%"
   },
   {
     "source": "bg/bg_portrait.webp",
@@ -126,9 +126,9 @@
     "file": "runtime/bg/bg_portrait.webp",
     "width": 720,
     "height": 1280,
-    "bytes": 101338,
+    "bytes": 34574,
     "quality": 80,
     "method": 6,
-    "operation": "Lanczos resize only"
+    "operation": "Lanczos resize, Gaussian blur 3.0, top 45% darkened up to 30%"
   }
 ]

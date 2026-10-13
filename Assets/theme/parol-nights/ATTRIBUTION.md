@@ -1,5 +1,16 @@
 # Parol Nights — Asset attribution
 
+## Generated spin controls — 2026-10-13
+
+User requested generated replacements for the newly implemented spin and stop glyphs.
+Created with built-in `image_gen.imagegen`; model identifier not exposed. One generation
+per layer, native alpha: `ui/spin_arrows.webp`, `ui/spin_star.webp`, `ui/stop_icon.webp`.
+Original PNGs are preserved in `source/spin-controls/`. Exact prompts are recorded in
+`source/spin-controls-prompts.json`. No image references were passed to the generator.
+Packaging only trims transparent bounds, resizes uniformly and adds transparent padding;
+operations and source hashes are recorded in `source/spin-controls/processing.json`.
+No licensing claim is made.
+
 ## Stage 4 — food icons
 
 Generated 2026-10-13 with built-in `image_gen.imagegen`, after explicit Stage 3 approval and Stage 4 authorization. Model identifier was not exposed. All six used the approved `source/H1.png` only as a style reference. All selected first attempts; native transparency. Preserved source records: `source/generation-stage4.json`. No licensing claim is made.

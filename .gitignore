@@ -2,3 +2,4 @@ node_modules
 dist
 scripts/assets/.python/
 scripts/assets/__pycache__/
+_review/

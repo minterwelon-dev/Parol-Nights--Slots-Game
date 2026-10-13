@@ -4,8 +4,8 @@ A 5x3, 40-line HTML5 slot built the way a regulated-market studio builds a clien
 
 Phaser 3.90 · TypeScript (strict) · Vite 8 · desktop and mobile (portrait and landscape, live rotation).
 
-- **Live demo:** not deployed yet (see [SKIPPED.md](SKIPPED.md))
-- **Gameplay video:** not recorded yet (see [SKIPPED.md](SKIPPED.md))
+- **Live demo:** GitHub Pages, deployed by [.github/workflows/pages.yml](.github/workflows/pages.yml) on every push to `main` (link added after the first deploy)
+- **Gameplay video:** [docs/media/gameplay.mp4](docs/media/gameplay.mp4) (39 s, 1280x720, silent): base game, the debug panel forcing Free Spins and Hold & Win, both features played through
 
 ## Run it
 
@@ -36,7 +36,7 @@ flowchart LR
   MOCK -. implements .-> IFACE[rgs/RGS.ts<br/>interface]
   IFACE --> SCENE[scenes/GameScene.ts<br/>wiring only]
   SCENE --> FSM[state/SlotStateMachine.ts]
-  SCENE --> MODS[game/*<br/>Reels, WinLines, WinPresenter,<br/>FreeSpins, HoldAndWin, Hud,<br/>Paytable, SoundManager]
+  SCENE --> MODS[game/*<br/>Reels, WinLines, animation/*,<br/>FreeSpins, HoldAndWin, Hud,<br/>Paytable, SoundManager]
   PAY -. generates .-> MODS
 ```
 
@@ -167,21 +167,24 @@ grep -o "forcePicker\|__rgs\|__game\|Reset session\|console.error\|force=" dist/
 
 ## Bundle size
 
-Production build, 2026-10-13 (`npm run build`):
+Production build, 2026-10-13 (`npm run build`), current working tree including art-audit
+changes, generated spin/stop controls and the ANIMATION_SPEC.md implementation:
 
 | File | Raw | Gzip |
 |---|---|---|
-| `assets/index-*.js` (game + Phaser 3.90) | 1,276.9 KB | 345.0 KB |
+| `assets/index-*.js` (game + Phaser 3.90; includes two small control glyphs) | 1,325.0 KB | 364.0 KB |
 | `index.html` | 0.7 KB | 0.5 KB |
 | 3 Latin WOFF2 fonts | 53.8 KB | 53.9 KB |
-| Theme WebPs (including 71.1 KB optional food icons, not requested at runtime) | 666.2 KB | 664.8 KB |
+| External theme WebPs (food icons now load deferred for the feast table) | 539.0 KB | 537.5 KB |
 | Font license notices | 9.0 KB | 4.0 KB |
 | 6 MP3 SFX (deferred; 2 more under 4 KB are inlined in the JS) | 69.2 KB | (already compressed) |
-| **Total `dist/`** | **2,075.8 KB** | **1,109.0 KB** |
+| **Total `dist/`** | **1,996.7 KB** | **1,000.7 KB** |
 
-Measured after art integration with Node `zlib.gzipSync` (decimal KB; total gzip is the sum
-of individually compressed files). Critical art is 493.7 KB landscape / 489.6 KB portrait;
-the opposite background and audio load deferred. Existing startup fonts are separate.
+Measured with Node `zlib.gzipSync` (decimal KB; total gzip is the sum of individually compressed
+files). Critical source art is 439.2 KB landscape / 438.9 KB portrait; the opposite background,
+food icons and audio load deferred. Existing startup fonts are separate. Generated control
+layers add 16,044 bytes of WebP art (two under 4 KB are inlined by Vite), with preserved sources
+and prompts in `Assets/theme/parol-nights/source/spin-controls/` and `spin-controls-prompts.json`.
 See [art integration report](docs/art-integration.md) for mapping, resize logs, preserved
 placeholders, original-asset sizes, screenshots/evidence paths and verification limitations.
 Title: Cinzel Decorative 700. UI/numbers: Baloo 2 400/700. Both SIL OFL 1.1;
@@ -194,6 +197,19 @@ startup timeout and late-load refresh. Audio loads after the first screen; spin
 shows "LOADING n%" until it is ready.
 
 ## Performance
+
+Animation pass (ANIMATION_SPEC.md Step 8; 412 x 915 and 915 x 412 at DPR 2.625, 4x CPU throttle, full
+motion, rAF frame probe, dev build):
+
+| Orientation | Idle | Spin | Mega win | Free Spins | Hold & Win (Grand) |
+|---|---|---|---|---|---|
+| Portrait | 113.8 FPS | 98.4 | 93.0 | 89.1 | 80.0 |
+| Landscape | 132.6 FPS | 116.8 | 88.1 | 104.0 | 111.4 |
+
+p95 frame 10-20 ms in every state. The only frames over 100 ms happen in `Spinning` while the
+dev-only forced-outcome picker scans seeds (about 3 s for a forced mega win at 4x throttle); an
+unforced round has none. Tween count in Idle returns to its baseline (8) after big win, Free
+Spins and Hold & Win; no post-FX left active; particles capped at 150 (100 on mobile).
 
 Art integration recheck (412 x 915, DPR 2, 4x CPU throttle): actual Phaser rendered-frame
 counts over four seconds averaged **115.2 FPS idle / 91.0 FPS big win**. Big-win p95 was
@@ -216,7 +232,7 @@ Caveats: the GPU was a desktop RTX 3060, so the throttle only simulates a slow C
 
 ## Ship checklist status
 
-See the Ship Checklist in [AGENTS.md](AGENTS.md). Everything is ticked except the live demo link and the gameplay video, which [SKIPPED.md](SKIPPED.md) lists.
+See the Ship Checklist in [AGENTS.md](AGENTS.md). Everything is ticked except the live demo link, which waits for the first GitHub Pages deploy.
 
 ## Project layout
 
@@ -229,7 +245,7 @@ src/rgs/               types, RGS interface, MockRGS, force (dev only)
 src/state/             SlotStateMachine
 src/scenes/            BootScene (critical art, fallback textures), GameScene (wiring, deferred loading)
 src/theme/             Parol Nights texture keys and asset URLs
-src/game/              Reels, Symbol, WinLines, WinPresenter, FeatureOverlay, FreeSpins, HoldAndWin,
+src/game/              Reels, Symbol, WinLines, animation/ (WinPresenter, animators), FeatureOverlay, FreeSpins, HoldAndWin,
                        Hud, Paytable, ErrorModal, SoundManager, fx, DebugPanel (dev only)
 src/utils/             responsive (sx/sy/sd), format, timeline (skippable steps), anticipation, progress, fitText
 scripts/               simulate.ts, check.ts, spin.ts (inspect one seeded round)

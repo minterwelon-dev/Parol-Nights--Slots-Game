@@ -2,6 +2,8 @@ export const STORAGE_KEYS = {
   rgs: 'parol-nights-rgs',
   progress: 'parol-nights-progress',
   muted: 'parol-nights-muted',
+  /** reduced-motion choice: '1' reduced, '0' full, absent = follow the OS setting */
+  motion: 'parol-nights-motion',
 } as const;
 
 export const LEGACY_STORAGE_KEYS = {

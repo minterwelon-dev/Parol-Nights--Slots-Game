@@ -14,6 +14,7 @@ import { evaluateLines, countSymbol } from '../src/math/evaluate';
 import { FS_MAX_MULT, playFreeSpins, playHoldAndWin } from '../src/math/features';
 import { playRound } from '../src/math/round';
 import type { FreeSpin } from '../src/rgs/types';
+import { AnimationHandle } from '../src/game/animation/AnimationHandle';
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS, migrateStorage } from '../src/utils/storage';
 
 // ---- step 1: rng, paylines, paytable ----
@@ -381,3 +382,45 @@ console.log('check phase 2 fsm: ok');
   assert.equal(tease(coins, false), '00000');
 }
 console.log('check anticipation: ok');
+
+// ---- animation handle: finish applies end state, cancel resets, both stop parts and resolve ----
+{
+  let stops = 0;
+  const part = { stop: () => stops++ };
+  const log: string[] = [];
+  const a = new AnimationHandle().add(
+    part,
+    () => log.push('final'),
+    () => log.push('neutral'),
+  );
+  a.finish();
+  a.finish(); // settled: no second end state
+  await a.done;
+  assert.deepEqual(log, ['final']);
+  assert.equal(stops, 1);
+  assert.equal(a.active, false);
+
+  const b = new AnimationHandle().add(
+    part,
+    () => log.push('final'),
+    () => log.push('neutral'),
+  );
+  b.cancel();
+  await b.done;
+  assert.deepEqual(log, ['final', 'neutral']);
+  b.add(part); // late part on a settled handle stops at once
+  assert.equal(stops, 3);
+
+  const c1 = new AnimationHandle().add(null, () => log.push('c1'));
+  const c2 = new AnimationHandle().add(null, () => log.push('c2'));
+  const all = AnimationHandle.all([c1, c2]);
+  all.finish();
+  await all.done;
+  assert.deepEqual(log.slice(2), ['c1', 'c2']);
+  const n1 = new AnimationHandle();
+  const group = AnimationHandle.all([n1]);
+  n1.complete(); // natural end of every child settles the group
+  await group.done;
+  assert.equal(group.active, false);
+}
+console.log('check animation handle: ok');

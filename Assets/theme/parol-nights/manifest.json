@@ -205,5 +205,32 @@
     "hasAlpha": true,
     "bytes": 13318,
     "role": "icon"
+  },
+  {
+    "id": "spin_arrows",
+    "file": "ui/spin_arrows.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 10094,
+    "role": "ui"
+  },
+  {
+    "id": "spin_star",
+    "file": "ui/spin_star.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 3822,
+    "role": "ui"
+  },
+  {
+    "id": "stop_icon",
+    "file": "ui/stop_icon.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "bytes": 2128,
+    "role": "ui"
   }
 ]

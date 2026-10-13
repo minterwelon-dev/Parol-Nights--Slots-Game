@@ -16,20 +16,18 @@ _Last updated: 2026-10-13_
 
 | Item | Status | What it would take |
 |---|---|---|
-| Deployed demo (GitHub Pages or Netlify) | Skipped at the user's request | `npm run build`, then publish `dist/`. For GitHub Pages under a sub-path, set `base` in `vite.config.ts`. Then add the link to the README. |
-| 30–60 s gameplay video | Skipped at the user's request | Record the base game, free spins, hold & win, and the debug panel forcing a feature (dev build). Then add the link to the README. |
+| Deployed demo (GitHub Pages) | In progress | `.github/workflows/pages.yml` builds, runs the self-checks and the debug-code gate, and publishes `dist/` on pushes to `main`. Needs the public GitHub repo URL, a push, and Pages set to "GitHub Actions" in the repo settings. Then add the link to the README and tick the Ship Checklist. |
+
+The gameplay video is done: `docs/media/gameplay.mp4`.
 
 ## Ship Checklist items left open
 
-These depend on the skipped delivery items above:
-
-- **Live demo link** in the README: needs the deployed demo.
-- **Gameplay video** in the README: needs the recording.
+- **Live demo link** in the README: needs the first Pages deploy.
 
 ## Smaller gaps (not separate brief items)
 
 | Gap | Notes |
 |---|---|
 | No separate settings modal | Phase 4 asked for a "settings and paytable modal". The paytable modal exists. The settings (mute, turbo) are HUD toggles, so no settings modal was built. |
-| Placeholder art and audio | Symbols and UI are generated at boot (canvas textures). The 8 SFX are ffmpeg-synthesized placeholders. Final art is a brief non-goal; `Assets/audio/SOUND_MAP.txt` says how to swap the audio. |
-| Phaser chunk not split | The single JS chunk is ~1.27 MB raw / ~343 KB gzip, almost all Phaser. Vite warns about the chunk size. Splitting it with `manualChunks` would help caching only, not the first load. |
+| Placeholder audio | Symbols, backgrounds and UI now use the generated Parol Nights art (procedural fallbacks remain for load failures). The 8 SFX are still ffmpeg-synthesized placeholders. Final art is a brief non-goal; `Assets/audio/SOUND_MAP.txt` says how to swap the audio. |
+| Phaser chunk not split | The single JS chunk is ~1.33 MB raw / ~364 KB gzip, almost all Phaser. Vite warns about the chunk size. Splitting it with `manualChunks` would help caching only, not the first load. |

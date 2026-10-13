@@ -1,26 +1,34 @@
 import Phaser from 'phaser';
+import { THEME } from '../constants';
 import { gameConfig, type SpinTiming } from '../gameConfig';
 import type { FreeSpinsRound, SymbolId } from '../rgs/types';
 import { anticipation } from '../utils/anticipation';
 import type { Layout } from '../utils/responsive';
 import { Timeline } from '../utils/timeline';
+import { FeastTable } from './FeastTable';
 import { FeatureOverlay } from './FeatureOverlay';
 import type { Reels } from './Reels';
-import type { WinPresenter } from './WinPresenter';
+import type { WinPresenter } from './animation/WinPresenter';
+import { ANIM_EVENTS, type AnimationService } from './animation/AnimationService';
+import { milestone } from './animation/FeatureAnimations';
 
 type Strips = readonly (readonly SymbolId[])[];
 /** What a tap does right now: overlay = fast-forward, spin = quick stop, present = skip win. */
 type Phase = 'none' | 'overlay' | 'spin' | 'present';
 
 const cfg = gameConfig.freeSpins;
+const MILESTONES: readonly number[] = gameConfig.anim.feature.milestones;
+const SUB = '#fff6a8';
 
 /**
  * Free Spins presentation: plays back the spins already decided in the response.
  * Never computes a win: amounts come from spin.win / round.totalWin.
  */
 export class FreeSpins {
+  private scene: Phaser.Scene;
   private tl: Timeline;
   private ov: FeatureOverlay;
+  private table: FeastTable;
   private phase: Phase = 'none';
   private slam = false;
   private mult = 1;
@@ -30,15 +38,17 @@ export class FreeSpins {
     private reels: Reels,
     private presenter: WinPresenter,
     private strips: { base: Strips; free: Strips },
+    private anim: AnimationService,
   ) {
+    this.scene = scene;
     this.tl = new Timeline(scene);
-    this.ov = new FeatureOverlay(scene, {
-      dim: 0x12001a,
-      edge: 0xc56bff,
-      title: '#ff9cf6',
-      sub: '#fff6a8',
-      stroke: '#4a0b66',
-    });
+    this.ov = new FeatureOverlay(
+      scene,
+      // logo gold on a deep navy-red dim; the parol-red glow marks the feature
+      { dim: 0x170818, edge: 0xffc23d, glow: THEME.glow.red, sub: SUB, stroke: THEME.stroke },
+      anim,
+    );
+    this.table = new FeastTable(scene, anim);
   }
 
   /** True from intro to the end of the summary. */
@@ -77,8 +87,10 @@ export class FreeSpins {
     for (let i = 0; i < startAt; i++) shown += round.spins[i].win;
     this.presenter.showTotal(shown);
     const sub = startAt > 0 ? 'RESUMED' : `${round.awarded} SPINS`;
-    await this.ov.step(this.tl, 'FREE SPINS', sub, 'TAP TO START', cfg.introMs);
+    this.anim.emit(ANIM_EVENTS.featureIntro, 'freeSpins');
+    await this.ov.step(this.tl, 'FREE SPINS', sub, 'TAP TO START', cfg.introMs, 'intro');
 
+    this.table.show(startAt, startAt > 0 ? round.spins[startAt - 1].spinsLeft : round.awarded);
     this.mult = round.spins[startAt]?.multiplier ?? 1; // a round's starting value never flies in
     this.reels.setStrips(this.strips.free);
     this.presenter.clearLines();
@@ -102,10 +114,11 @@ export class FreeSpins {
       }
       this.phase = 'overlay';
       if (s.retrigger > 0) {
-        await this.ov.step(this.tl, `+${s.retrigger}`, 'FREE SPINS', '', cfg.bannerMs);
+        await this.ov.step(this.tl, `+${s.retrigger}`, 'FREE SPINS', '', cfg.bannerMs, 'drop');
         this.setBar(s.spinsLeft, s.multiplier);
-        this.ov.popBar('left');
+        this.ov.flipBar('left');
       }
+      this.table.fill(i + 1, s.spinsLeft);
       onStep?.(i + 1);
       await this.tl.wait(cfg.spinGapMs);
       this.tl.reset();
@@ -117,6 +130,7 @@ export class FreeSpins {
   /** Summary overlay; leaves the meter on the round total from the response. */
   async summary(round: FreeSpinsRound, totalWin: number) {
     this.phase = 'overlay';
+    this.table.sparkle();
     // capped: the response already ended the feature early; say so instead of a normal summary
     await this.ov.summary(
       this.tl,
@@ -127,6 +141,7 @@ export class FreeSpins {
       cfg.summaryHoldMs,
     );
     this.ov.bar(null);
+    this.table.hide();
     this.presenter.clearLines();
     this.presenter.showTotal(totalWin);
     this.reels.setStrips(this.strips.base);
@@ -137,11 +152,16 @@ export class FreeSpins {
   private setBar(left: number, mult: number) {
     const up = mult > this.mult;
     this.ov.bar(`FREE SPINS ${left}`, `MULTIPLIER x${up ? this.mult : mult}`);
-    if (up) this.ov.fly(`+${mult - this.mult}`, 'right', `MULTIPLIER x${mult}`);
+    if (up)
+      this.ov.fly(`+${mult - this.mult}`, 'right', `MULTIPLIER x${mult}`, (t) => {
+        this.anim.emit(ANIM_EVENTS.multiplierTick, mult);
+        if (MILESTONES.includes(mult)) milestone(this.scene, this.anim, t, SUB);
+      });
     this.mult = mult;
   }
 
   relayout(l: Layout) {
     this.ov.relayout(l);
+    this.table.relayout(l);
   }
 }

@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { SFX } from '../assets';
 import { Background } from '../game/Background';
+import { ANIM_EVENTS, AnimationService } from '../game/animation/AnimationService';
+import { AmbientBackground } from '../game/animation/AmbientBackground';
+import type { AnimationHandle } from '../game/animation/AnimationHandle';
 import { ART, deferredArt, warnMissing } from '../theme/parolNights';
 import { BootScene } from './BootScene';
 import { RELAYOUT } from '../constants';
@@ -11,7 +14,7 @@ import { Hud } from '../game/Hud';
 import { Paytable } from '../game/Paytable';
 import { Reels } from '../game/Reels';
 import { WinLines } from '../game/WinLines';
-import { WinPresenter } from '../game/WinPresenter';
+import { WinPresenter } from '../game/animation/WinPresenter';
 import { SoundManager } from '../game/SoundManager';
 import { gameConfig, type SpinTiming } from '../gameConfig';
 import { RGSError, type RGS } from '../rgs/RGS';
@@ -27,6 +30,7 @@ const MAX_DT = 50;
 /** Wiring only: creates modules, talks to the RGS, drives the state machine. */
 export class GameScene extends Phaser.Scene {
   private background?: Background;
+  private ambient?: AmbientBackground;
   private fsm = new SlotStateMachine();
   private reels?: Reels;
   private winLines?: WinLines;
@@ -35,6 +39,8 @@ export class GameScene extends Phaser.Scene {
   private holdAndWin?: HoldAndWin;
   private hud!: Hud;
   private sfx!: SoundManager;
+  /** shared animation facade; modules adopt it step by step (ANIMATION_SPEC.md build order) */
+  private anim!: AnimationService;
   private errorModal!: ErrorModal;
   private paytable!: Paytable;
   private sessionId = '';
@@ -48,6 +54,10 @@ export class GameScene extends Phaser.Scene {
   /** player asked for a quick stop this round */
   private slam = false;
   private minSpinTimer?: Phaser.Time.TimerEvent;
+  private devFrame = 0;
+  private devWarned = false;
+  /** feature trigger animation; a tap finishes it */
+  private triggerFx?: AnimationHandle;
 
   constructor(private rgs: RGS) {
     super('Game');
@@ -62,18 +72,29 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.sfx = new SoundManager(this);
+    this.anim = new AnimationService(this);
+    this.ambient = new AmbientBackground(this, this.anim, this.background);
     const click = (fn: () => void) => () => {
       fn();
       this.sfx.play('click');
     };
-    this.hud = new Hud(this, {
-      spin: () => this.onSpinPressed(),
-      betDown: click(() => this.changeBet(-1)),
-      betUp: click(() => this.changeBet(1)),
-      turbo: click(() => this.hud.setTurbo((this.turbo = !this.turbo))),
-      mute: click(() => this.hud.setMuted(this.sfx.toggleMute())),
-      info: click(() => this.fsm.state === 'Idle' && this.paytable.open(this.bet)),
-    });
+    this.hud = new Hud(
+      this,
+      {
+        spin: () => this.onSpinPressed(),
+        betDown: click(() => this.changeBet(-1)),
+        betUp: click(() => this.changeBet(1)),
+        turbo: click(() => {
+          this.hud.setTurbo((this.turbo = !this.turbo));
+          this.anim.setTurbo(this.turbo);
+        }),
+        mute: click(() => this.hud.setMuted(this.sfx.toggleMute())),
+        info: click(() => this.fsm.state === 'Idle' && this.paytable.open(this.bet)),
+        motion: click(() => this.hud.setReducedMotion(this.anim.toggleReduced())),
+      },
+      this.anim,
+    );
+    this.hud.setReducedMotion(this.anim.reduced);
     this.hud.setMuted(this.sfx.isMuted);
     this.errorModal = new ErrorModal(this);
     this.paytable = new Paytable(this);
@@ -89,19 +110,26 @@ export class GameScene extends Phaser.Scene {
 
     const strips = init.reelStrips.base;
     const grid = init.unfinished?.grid ?? strips.map((s) => [s[0], s[1], s[2]]);
-    this.reels = new Reels(this, strips, grid);
-    this.winLines = new WinLines(this, this.reels);
-    this.presenter = new WinPresenter(this, this.winLines);
-    this.freeSpins = new FreeSpins(this, this.reels, this.presenter, init.reelStrips);
-    this.holdAndWin = new HoldAndWin(this, this.presenter);
-    this.reels.hooks = {
-      spin: () => this.sfx.play('spin'),
-      land: () => {
-        this.sfx.stop('tease');
-        this.sfx.play('stop');
-      },
-      tease: () => this.sfx.play('tease'),
-    };
+    this.reels = new Reels(this, this.anim, strips, grid);
+    this.winLines = new WinLines(this, this.reels, this.anim);
+    this.presenter = new WinPresenter(this, this.winLines, this.anim);
+    this.freeSpins = new FreeSpins(this, this.reels, this.presenter, init.reelStrips, this.anim);
+    this.holdAndWin = new HoldAndWin(this, this.presenter, this.anim);
+    // sound keys off animation events; animation never plays audio itself
+    this.events.on(ANIM_EVENTS.spinStart, () => this.sfx.play('spin'));
+    this.events.on(ANIM_EVENTS.reelLanded, () => {
+      this.sfx.stop('tease');
+      this.sfx.play('stop');
+    });
+    this.events.on(ANIM_EVENTS.anticipationStart, () => this.sfx.play('tease'));
+    // idle sway / breathe only while the machine sits in Idle
+    this.fsm.on((_, to) => this.reels?.setIdle(to === 'Idle'));
+    // feature palette: the painted background shifts tint for the feature's duration
+    this.fsm.on((_, to) => {
+      if (to === 'FreeSpins' || to === 'HoldAndWin')
+        this.ambient?.setMode(to === 'FreeSpins' ? 'freeSpins' : 'holdAndWin');
+      if (to === 'Idle') this.ambient?.setMode('base');
+    });
     this.presenter.onWin = (big) => this.sfx.play(big ? 'bigwin' : 'win');
     this.holdAndWin.onCoin = () => this.sfx.play('coin');
     // tap anywhere skips / fast-forwards whatever is presenting
@@ -114,6 +142,15 @@ export class GameScene extends Phaser.Scene {
 
   update(_time: number, delta: number) {
     this.reels?.update(Math.min(delta, MAX_DT));
+    this.ambient?.update(Math.min(delta, MAX_DT));
+    // dev budget check (spec QA): active particles under the cap
+    if (import.meta.env.DEV && this.anim && ++this.devFrame % 30 === 0) {
+      const n = this.anim.fx.alive();
+      if (n > this.anim.particleCap && !this.devWarned) {
+        this.devWarned = true;
+        console.warn(`[fx] ${n} particles alive > cap ${this.anim.particleCap}`);
+      }
+    }
   }
 
   /** Deferred manifest: fetched while the player sits on Idle. A failed file never blocks play. */
@@ -169,6 +206,7 @@ export class GameScene extends Phaser.Scene {
 
   private onTap() {
     if (this.paytable.isOpen) return; // taps belong to the modal
+    if (this.triggerFx?.active) return this.triggerFx.finish();
     if (this.freeSpins!.active) this.freeSpins!.tap();
     else if (this.holdAndWin!.active) this.holdAndWin!.tap();
     else if (this.fsm.state === 'WinPresentation') this.presenter!.skip();
@@ -176,6 +214,7 @@ export class GameScene extends Phaser.Scene {
 
   private onSpinPressed() {
     if (this.paytable.isOpen) return;
+    if (this.triggerFx?.active) return this.triggerFx.finish();
     const s = this.fsm.state;
     if (this.freeSpins!.active) return this.freeSpins!.tap();
     if (this.holdAndWin!.active) return this.holdAndWin!.tap();
@@ -240,6 +279,14 @@ export class GameScene extends Phaser.Scene {
       await this.presenter!.present(res.lineWins, res.baseWin, res.bet);
     } else {
       this.presenter!.showTotal(res.baseWin);
+    }
+
+    // trigger celebration on the symbols that started the feature (not when resuming mid-feature)
+    if (f && featureFrom === undefined) {
+      this.presenter!.clearLines();
+      this.triggerFx = this.reels!.trigger(f.type === 'freeSpins' ? 'SCATTER' : 'COIN');
+      await this.triggerFx.done;
+      this.presenter!.clearLines(); // the intro overlay takes over; nothing stays dimmed after the feature
     }
 
     const save = (step: number) => saveProgress(res.roundId, step);
@@ -313,6 +360,7 @@ export class GameScene extends Phaser.Scene {
 
   private relayout(l: Layout) {
     this.background?.relayout(l);
+    this.ambient?.relayout();
     this.reels?.relayout(l);
     this.hud?.relayout(l);
     this.errorModal?.relayout(l);
