@@ -28,7 +28,11 @@ jobs:
       - run: npm run check
       - run: npm run build
       # release gate (AGENTS.md): the production bundle must not contain debug code
-      - run: "! grep -o 'forcePicker\|__rgs\|__game\|Reset session\|console.error' dist/assets/*.js"
+      - name: No debug code in the bundle
+        run: |
+          if grep -E -o 'forcePicker|__rgs|__game|Reset session|console\.error' dist/assets/*.js; then
+            echo "debug code found in dist" && exit 1
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
