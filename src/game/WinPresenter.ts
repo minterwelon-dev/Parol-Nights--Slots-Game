@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { DEPTH, HUD_LAYOUT, POD, THEME } from '../constants';
 import { gameConfig, type WinTier } from '../gameConfig';
 import type { LineWin } from '../rgs/types';
-import { SYMBOL_TEX, UI, symbolKey } from '../scenes/BootScene';
+import { UI, symbolKey } from '../scenes/BootScene';
 import { fitText } from '../utils/fitText';
 import { formatMoney } from '../utils/format';
 import { layout, sd, sx, sy, type Layout } from '../utils/responsive';
@@ -89,7 +89,11 @@ export class WinPresenter {
         y: { onEmit: () => -this.coinPx },
         speedX: { onEmit: () => R.Between(-140, 140) * layout.s },
         speedY: { onEmit: () => R.Between(120, 420) * layout.s },
-        scale: { onEmit: () => (this.coinPx / SYMBOL_TEX) * R.FloatBetween(0.6, 1.1) },
+        scale: {
+          onEmit: () =>
+            (this.coinPx / scene.textures.get(symbolKey('COIN')).getSourceImage().width) *
+            R.FloatBetween(0.6, 1.1),
+        },
         rotate: { start: 0, end: 540 },
         lifespan: 3200,
         frequency: gameConfig.win.showerMs,

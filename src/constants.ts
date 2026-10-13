@@ -8,11 +8,11 @@ export const REF = {
  * from here so the look stays consistent.
  */
 export const THEME = {
-  panel: 0x1c0d09,
+  panel: 0x0b1033,
   panelEdge: 0x6e3f1a,
   frame: 0xf0a640,
-  reelBack: 0x170a07,
-  reelColumn: 0x26120c,
+  reelBack: 0x080e28,
+  reelColumn: 0x111a3b,
   gold: '#ffd34d',
   goldDeep: '#d9861a',
   ember: '#ff8a3d',
@@ -28,9 +28,15 @@ export const THEME = {
 } as const;
 
 /** Reel window placement in reference space: center and cell (symbol) size. */
+export const FRAME = {
+  width: 1700,
+  height: 1100,
+  window: { x: 100, y: 100, width: 1500, height: 900 },
+} as const;
+
 export const REEL_LAYOUT = {
-  landscape: { cx: 960, cy: 478, cell: 205 },
-  portrait: { cx: 540, cy: 750, cell: 200 },
+  landscape: { cx: 960, cy: 540, maxWidth: 1600, maxHeight: 650 },
+  portrait: { cx: 540, cy: 790, maxWidth: 980, maxHeight: 640 },
 } as const;
 
 /**
@@ -80,8 +86,8 @@ export const POD = { labelDy: -30, valueDy: 14 } as const;
 
 /** Feature info pill (free spins counter / multiplier, H&W respins / total) above the reels. */
 export const FEATURE_LAYOUT = {
-  landscape: { pill: { x: 960, y: 114, w: 940, h: 48 }, left: 740, right: 1180, font: 30 },
-  portrait: { pill: { x: 540, y: 378, w: 980, h: 62 }, left: 300, right: 780, font: 36 },
+  landscape: { pill: { x: 960, y: 183, w: 940, h: 38 }, left: 740, right: 1180, font: 26 },
+  portrait: { pill: { x: 540, y: 449, w: 980, h: 46 }, left: 300, right: 780, font: 30 },
 } as const;
 
 /** game.events: viewport changed, payload is the Layout */

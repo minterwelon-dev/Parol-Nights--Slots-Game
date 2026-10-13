@@ -78,14 +78,14 @@ export class HoldAndWin {
       );
       this.values.push(
         scene.add
-          .text(0, 0, '', { fontFamily: FONT, color: '#4a1f00' })
+          .text(0, 0, '', { fontFamily: FONT, color: '#fff1d6', stroke: '#0b1033' })
           .setOrigin(0.5)
           .setDepth(DEPTH.FEATURE_OVERLAY)
           .setVisible(false),
       );
       this.labels.push(
         scene.add
-          .text(0, 0, '', { fontFamily: FONT, color: '#4a1f00' })
+          .text(0, 0, '', { fontFamily: FONT, color: '#fff1d6', stroke: '#0b1033' })
           .setOrigin(0.5)
           .setDepth(DEPTH.FEATURE_OVERLAY)
           .setVisible(false),
@@ -272,8 +272,14 @@ export class HoldAndWin {
       .setPosition(x, y)
       .setAlpha(1)
       .setDisplaySize(cell * COIN_FILL, cell * COIN_FILL);
-    this.values[i].setPosition(x, y + sd(10)).setAlpha(1);
-    this.labels[i].setPosition(x, y - sd(layout.cell * 0.2)).setAlpha(1);
+    this.values[i]
+      .setPosition(x, y + sd(layout.cell * 0.17))
+      .setAlpha(1)
+      .setStroke('#0b1033', sd(3));
+    this.labels[i]
+      .setPosition(x, y - sd(layout.cell * 0.03))
+      .setAlpha(1)
+      .setStroke('#0b1033', sd(3));
     this.flashes[i].setPosition(x, y);
   }
 

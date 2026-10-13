@@ -56,7 +56,8 @@ class Button {
   }
 
   place(x: number, y: number, w: number, h: number, font: number) {
-    this.img.setPosition(x, y).setDisplaySize(w, h);
+    const fit = Math.min(w / this.img.width, h / this.img.height);
+    this.img.setPosition(x, y).setDisplaySize(this.img.width * fit, this.img.height * fit);
     // optical centering: heavy glyphs sit a touch high
     this.label.setPosition(x, y - font * 0.04).setFontSize(Math.round(font));
   }
@@ -250,8 +251,8 @@ export class Hud {
   /** ON: solid gold pill, dark text. OFF: outlined pill, muted text. Always pressable. */
   setTurbo(on: boolean) {
     this.turboOn = on;
-    this.turboBtn.img.setTexture(on ? UI.btn : UI.pillOff);
-    this.turboBtn.label.setColor(on ? THEME.ink : THEME.muted);
+    this.turboBtn.img.setTint(on ? 0xffdf80 : 0xb0b0c8);
+    this.turboBtn.label.setColor(on ? THEME.gold : THEME.muted);
   }
 
   relayout(l: Layout) {

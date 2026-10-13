@@ -1,4 +1,4 @@
-import { REEL_LAYOUT, REF } from '../constants';
+import { FRAME, REEL_LAYOUT, REF } from '../constants';
 import { REELS, ROWS } from '../math/config'; // grid shape only, no outcome logic
 
 export interface Rect {
@@ -19,6 +19,7 @@ export interface Layout {
   offY: number;
   /** reel window in reference space */
   reel: Rect;
+  frame: Rect;
   /** symbol cell size in reference space */
   cell: number;
 }
@@ -30,6 +31,7 @@ export const layout: Layout = {
   s: 1,
   offX: 0,
   offY: 0,
+  frame: { x: 0, y: 0, w: 0, h: 0 },
   reel: { x: 0, y: 0, w: 0, h: 0 },
   cell: 0,
 };
@@ -47,11 +49,16 @@ export function updateLayout(viewW: number, viewH: number): Layout {
   layout.offY = (viewH - ref.h * s) / 2;
 
   const r = landscape ? REEL_LAYOUT.landscape : REEL_LAYOUT.portrait;
-  layout.cell = r.cell;
-  layout.reel.w = r.cell * REELS;
-  layout.reel.h = r.cell * ROWS;
-  layout.reel.x = r.cx - layout.reel.w / 2;
-  layout.reel.y = r.cy - layout.reel.h / 2;
+  const scale = Math.min(r.maxWidth / FRAME.width, r.maxHeight / FRAME.height);
+  layout.frame.w = FRAME.width * scale;
+  layout.frame.h = FRAME.height * scale;
+  layout.frame.x = r.cx - layout.frame.w / 2;
+  layout.frame.y = r.cy - layout.frame.h / 2;
+  layout.reel.x = layout.frame.x + FRAME.window.x * scale;
+  layout.reel.y = layout.frame.y + FRAME.window.y * scale;
+  layout.reel.w = FRAME.window.width * scale;
+  layout.reel.h = FRAME.window.height * scale;
+  layout.cell = Math.min(layout.reel.w / REELS, layout.reel.h / ROWS);
   return layout;
 }
 

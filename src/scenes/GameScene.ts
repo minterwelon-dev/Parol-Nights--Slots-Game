@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { SFX } from '../assets';
 import { Background } from '../game/Background';
-import { deferredArt, warnMissing } from '../theme/parolNights';
+import { ART, deferredArt, warnMissing } from '../theme/parolNights';
 import { BootScene } from './BootScene';
 import { RELAYOUT } from '../constants';
 import { ErrorModal } from '../game/ErrorModal';
@@ -118,13 +118,13 @@ export class GameScene extends Phaser.Scene {
 
   /** Deferred manifest: fetched while the player sits on Idle. A failed file never blocks play. */
   private loadDeferred() {
-    const art = deferredArt(this.textures.exists('bg_landscape'));
+    const art = deferredArt(this.textures.exists(ART.landscape.key));
     for (const item of art) {
       if (item.url) this.load.image(item.key, item.url);
       else warnMissing(item.key);
     }
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
-      if (art.some(item => item.key === file.key)) warnMissing(file.key);
+      if (art.some((item) => item.key === file.key)) warnMissing(file.key);
     });
     for (const key in SFX) this.load.audio(key, SFX[key as keyof typeof SFX]);
     this.load.on(Phaser.Loader.Events.PROGRESS, (p: number) => this.hud.setLoading(p));

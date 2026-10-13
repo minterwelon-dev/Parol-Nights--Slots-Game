@@ -4,7 +4,7 @@ import ts from 'typescript-eslint';
 export default [
   js.configs.recommended,
   ...ts.configs.recommended,
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'scripts/assets/.python/**'] },
   {
     // math + scripts must stay Phaser/DOM free
     files: ['src/math/**', 'scripts/**'],

@@ -287,6 +287,16 @@ logged in `Assets/theme/parol-nights/runtime/manifest.json`; approved originals 
 Critical art including round/plaque controls: 493,740 bytes landscape / 489,572 portrait.
 Opposite background and audio are deferred; spin remains gated by existing deferred-ready behavior.
 Relative Vite base supports deployment under a sub-path. Browser verification is in progress.
+Layout/animation step complete: frame/window/cell geometry comes from the source dimensions and
+uniform layout scale; symbol images live in pooled containers, with container-only win/landing
+scale animation. Unmasked additive win glows stay beneath the front frame. UI bases retain their
+aspect ratios; envelope values use cream text with navy strokes. Feature counters have a clear
+gap below the ornament. Existing named depths are sufficient; no new depth constants were added.
+Build/type check, lint and all existing checks pass. The million-spin seed-42 simulation still
+reports 95.181% RTP. Browser smoke covers portrait/landscape, live rotation, paytable, anticipation,
+big win, Free Spins and Hold & Win, returning to Idle without warnings or exceptions.
+4x CPU throttle (412 x 915, DPR 2, desktop Chrome): actual rendered frames averaged 115.2 FPS idle
+and 91.0 FPS during big win; animation p95 15.7 ms / maximum 28.1 ms. Physical mobile remains untested.
 
 Parol Nights assets: Stages 1–4 approved; final delivery complete.
 All 23 exports delivered with manifest, source prompts, attribution, QA and four review sheets.

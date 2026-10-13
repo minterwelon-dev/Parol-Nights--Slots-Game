@@ -5,6 +5,7 @@ import { REELS, ROWS } from '../math/config';
 import type { SymbolId } from '../rgs/types';
 import { sd, sx, sy, type Layout } from '../utils/responsive';
 import { UI } from '../scenes/BootScene';
+import { ART } from '../theme/parolNights';
 import { SymbolView } from './Symbol';
 
 /** Symbols per reel: visible rows plus one buffer above and below. */
@@ -57,7 +58,8 @@ interface Run {
 export class Reels {
   private container: Phaser.GameObjects.Container;
   private back: Phaser.GameObjects.Graphics;
-  private front: Phaser.GameObjects.Graphics;
+  private front: Phaser.GameObjects.Image;
+  private highlights: Phaser.GameObjects.Container;
   private maskShape: Phaser.GameObjects.Graphics;
   private glow: Phaser.GameObjects.Graphics;
   private glowPulse: Phaser.Tweens.Tween;
@@ -94,7 +96,8 @@ export class Reels {
   ) {
     this.strips = strips;
     this.back = scene.add.graphics().setDepth(DEPTH.REEL_FRAME_BACK);
-    this.front = scene.add.graphics().setDepth(DEPTH.REEL_FRAME_FRONT);
+    this.front = scene.add.image(0, 0, ART.frame.key).setDepth(DEPTH.REEL_FRAME_FRONT);
+    this.highlights = scene.add.container(0, 0).setDepth(DEPTH.SYMBOL_HIGHLIGHT);
     this.container = scene.add.container(0, 0).setDepth(DEPTH.REELS);
     this.maskShape = scene.make.graphics({}, false);
     this.container.setMask(this.maskShape.createGeometryMask());
@@ -109,11 +112,13 @@ export class Reels {
       persist: true,
     });
 
-    // glows first so they render behind every symbol inside the masked container
+    // Unmasked additive glows can extend softly beneath the front frame.
     for (let i = 0; i < REELS * ROWS; i++) {
-      this.winGlows.push(scene.add.image(0, 0, UI.glow).setVisible(false));
+      this.winGlows.push(
+        scene.add.image(0, 0, UI.glow).setVisible(false).setBlendMode(Phaser.BlendModes.ADD),
+      );
     }
-    this.container.add(this.winGlows);
+    this.highlights.add(this.winGlows);
     this.winPulse = scene.tweens.add({
       targets: this.pulse,
       k: 1,
@@ -228,7 +233,7 @@ export class Reels {
         const win = !!mask && mask[i];
         this.winMask[i] = win;
         any ||= win;
-        this.cols[r][row + 1].img.setAlpha(!mask || win ? 1 : DIMMED);
+        this.cols[r][row + 1].root.setAlpha(!mask || win ? 1 : DIMMED);
         this.winGlows[i].setVisible(win || !!this.pops[i]);
       }
     }
@@ -241,17 +246,17 @@ export class Reels {
     }
   }
 
-  /** Winning symbols breathe in size (setDisplaySize, never setScale) and their glow brightens. */
+  /** Winning symbol containers breathe around their base scale of 1 and their glow brightens. */
   private applyPulse() {
     const k = this.pulse.k;
-    const base = this.cell * SYMBOL_FILL;
-    const grown = base * (1 + WIN_GROW * k);
+    const base = 1;
+    const grown = 1 + WIN_GROW * k;
     const glow = this.cell * (1.15 + 0.1 * k);
     for (let r = 0; r < REELS; r++) {
       for (let row = 0; row < ROWS; row++) {
         const i = r * ROWS + row;
         const s = this.winMask[i] ? grown : base;
-        this.cols[r][row + 1].img.setDisplaySize(s, s);
+        this.cols[r][row + 1].root.setScale(s);
         if (this.winMask[i]) this.winGlows[i].setDisplaySize(glow, glow).setAlpha(0.35 + 0.5 * k);
       }
     }
@@ -360,7 +365,7 @@ export class Reels {
   /** Feature symbol settles: quick size bump plus a fading glow burst. Win display owns the cell once set. */
   private landPop(r: number, row: number) {
     const i = r * ROWS + row;
-    const img = this.cols[r][row + 1].img;
+    const root = this.cols[r][row + 1].root;
     const glow = this.winGlows[i].setVisible(true);
     this.pops[i]?.stop(); // same cell landed again before the last pop ended
     this.pops[i] = this.scene.tweens.addCounter({
@@ -371,15 +376,15 @@ export class Reels {
       onUpdate: (t) => {
         if (this.winMask[i]) return;
         const k = t.getValue() ?? 1;
-        const s = this.cell * SYMBOL_FILL * (1 + LAND_POP * Math.sin(Math.PI * k));
+        const s = 1 + LAND_POP * Math.sin(Math.PI * k);
         const g = this.cell * (1 + 0.6 * k);
-        img.setDisplaySize(s, s);
+        root.setScale(s);
         glow.setDisplaySize(g, g).setAlpha(0.9 * (1 - k));
       },
       onComplete: () => {
         this.pops[i] = undefined;
         if (this.winMask[i]) return;
-        img.setDisplaySize(this.cell * SYMBOL_FILL, this.cell * SYMBOL_FILL);
+        root.setScale(1);
         glow.setVisible(false);
       },
     });
@@ -433,7 +438,7 @@ export class Reels {
   private place(r: number) {
     const col = this.cols[r];
     const y0 = (this.runs[r].offset - 0.5) * this.cell;
-    for (let i = 0; i < SLOTS; i++) col[i].img.y = y0 + i * this.cell;
+    for (let i = 0; i < SLOTS; i++) col[i].root.y = y0 + i * this.cell;
   }
 
   relayout(l: Layout) {
@@ -445,11 +450,11 @@ export class Reels {
     const pad = sd(18);
 
     this.container.setPosition(x, y);
+    this.highlights.setPosition(x, y);
     for (let r = 0; r < REELS; r++) {
       for (let i = 0; i < SLOTS; i++) {
-        this.cols[r][i].img
-          .setX((r + 0.5) * cell)
-          .setDisplaySize(cell * SYMBOL_FILL, cell * SYMBOL_FILL);
+        this.cols[r][i].root.setX((r + 0.5) * cell);
+        this.cols[r][i].resize(cell * SYMBOL_FILL);
       }
       this.place(r);
     }
@@ -476,9 +481,8 @@ export class Reels {
       this.back.fillRoundedRect(x + r * cell + sd(4), y, cell - sd(8), h, sd(14));
     }
 
-    this.front.clear();
     this.front
-      .lineStyle(sd(6), THEME.frame, 1)
-      .strokeRoundedRect(x - pad, y - pad, w + pad * 2, h + pad * 2, sd(28));
+      .setPosition(sx(l.frame.x + l.frame.w / 2), sy(l.frame.y + l.frame.h / 2))
+      .setDisplaySize(sd(l.frame.w), sd(l.frame.h));
   }
 }

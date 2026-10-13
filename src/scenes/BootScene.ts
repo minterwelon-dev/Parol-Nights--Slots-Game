@@ -2,15 +2,20 @@ import Phaser from 'phaser';
 import { RELAYOUT, THEME } from '../constants';
 import { Title } from '../game/Title';
 import { Background } from '../game/Background';
-import { ART as ASSETS, UI, symbolKey, blurKey, criticalArt, warnMissing } from '../theme/parolNights';
+import {
+  ART as ASSETS,
+  UI,
+  symbolKey,
+  blurKey,
+  criticalArt,
+  warnMissing,
+} from '../theme/parolNights';
 export { UI, symbolKey, blurKey } from '../theme/parolNights';
 import type { SymbolId } from '../rgs/types';
 import { layout, sd, sx, sy } from '../utils/responsive';
 
 /** Source size of generated symbol textures (px). Displayed via setDisplaySize(sd()). */
 export const SYMBOL_TEX = 256;
-
-
 
 interface Art {
   bg: [string, string];
@@ -63,9 +68,12 @@ export class BootScene extends Phaser.Scene {
     let background: Background | undefined;
     const placeBackground = () => background?.relayout(layout);
     this.game.events.on(RELAYOUT, placeBackground);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.off(RELAYOUT, placeBackground));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
+      this.game.events.off(RELAYOUT, placeBackground),
+    );
     this.load.on(Phaser.Loader.Events.FILE_COMPLETE, (key: string) => {
-      if (key === ASSETS.landscape.key || key === ASSETS.portrait.key) background = new Background(this);
+      if (key === ASSETS.landscape.key || key === ASSETS.portrait.key)
+        background = new Background(this);
     });
     const cx = sx(layout.w / 2);
     const cy = sy(layout.h / 2);
@@ -78,7 +86,9 @@ export class BootScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
       this.game.events.off(RELAYOUT, placeTitle),
     );
-    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => warnMissing(file.key));
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) =>
+      warnMissing(file.key),
+    );
     for (const item of this.critical) {
       if (item.url) this.load.image(item.key, item.url);
       else warnMissing(item.key);
@@ -108,7 +118,11 @@ export class BootScene extends Phaser.Scene {
     for (const id in ART) {
       const a = ART[id as SymbolId];
       const key = symbolKey(id as SymbolId);
-      if (this.textures.exists(key) && !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)) continue;
+      if (
+        this.textures.exists(key) &&
+        !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)
+      )
+        continue;
       if (!this.textures.exists(key)) warnMissing(key);
       const tex = this.textures.exists(key)
         ? (this.textures.get(key) as Phaser.Textures.CanvasTexture)
@@ -154,15 +168,22 @@ export class BootScene extends Phaser.Scene {
       const logo = key === ASSETS.logo.key;
       const w = frame ? 1700 : logo ? 768 : 32;
       const h = frame ? 1100 : logo ? 288 : 32;
-      this.canvasTex(key, w, h, ctx => {
+      this.canvasTex(key, w, h, (ctx) => {
         if (frame || logo) {
           ctx.strokeStyle = '#FFC94A';
           ctx.lineWidth = frame ? 32 : 8;
-          ctx.strokeRect(frame ? 60 : 8, frame ? 60 : 8, w - (frame ? 120 : 16), h - (frame ? 120 : 16));
+          ctx.strokeRect(
+            frame ? 60 : 8,
+            frame ? 60 : 8,
+            w - (frame ? 120 : 16),
+            h - (frame ? 120 : 16),
+          );
         } else {
           const g = ctx.createLinearGradient(0, 0, 0, h);
-          g.addColorStop(0, '#0B1033'); g.addColorStop(1, '#231438');
-          ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+          g.addColorStop(0, '#0B1033');
+          g.addColorStop(1, '#231438');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
         }
       });
     }
@@ -174,7 +195,11 @@ export class BootScene extends Phaser.Scene {
     h: number,
     draw: (ctx: CanvasRenderingContext2D) => void,
   ) {
-    if (this.textures.exists(key) && !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)) return;
+    if (
+      this.textures.exists(key) &&
+      !(this.textures.get(key) instanceof Phaser.Textures.CanvasTexture)
+    )
+      return;
     const tex = this.textures.exists(key)
       ? (this.textures.get(key) as Phaser.Textures.CanvasTexture)
       : this.textures.createCanvas(key, w, h)!;
@@ -281,7 +306,13 @@ export class BootScene extends Phaser.Scene {
     // mute toggle: secondary disc with a speaker, sound waves (on) or a cross (off)
     for (const on of [true, false]) {
       this.canvasTex(on ? UI.soundOn : UI.soundOff, 128, 128, (ctx) => {
-        ctx.drawImage(this.textures.get(UI.round).getSourceImage() as HTMLImageElement, 0, 0, 128, 128);
+        ctx.drawImage(
+          this.textures.get(UI.round).getSourceImage() as HTMLImageElement,
+          0,
+          0,
+          128,
+          128,
+        );
         ctx.fillStyle = ctx.strokeStyle = on ? '#ffd34d' : '#b8916c';
         ctx.beginPath(); // speaker: box + cone
         ctx.moveTo(32, 52);
@@ -379,4 +410,3 @@ function spinDisc(ctx: CanvasRenderingContext2D) {
   ctx.strokeStyle = '#ffe9b0';
   ctx.stroke();
 }
-

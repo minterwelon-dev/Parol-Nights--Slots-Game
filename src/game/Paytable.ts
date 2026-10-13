@@ -56,7 +56,11 @@ export class Paytable {
     this.dim = dimLayer(scene, 0x000000, 0.72, d).setInteractive(); // swallows taps behind the modal
     this.chrome = scene.add.graphics().setDepth(d);
     this.title = scene.add
-      .text(0, 0, 'PAYTABLE', { fontFamily: THEME.fonts.ui, color: THEME.gold, stroke: THEME.stroke })
+      .text(0, 0, 'PAYTABLE', {
+        fontFamily: THEME.fonts.ui,
+        color: THEME.gold,
+        stroke: THEME.stroke,
+      })
       .setOrigin(0.5)
       .setDepth(d);
     this.closeBtn = scene.add
@@ -165,13 +169,16 @@ export class Paytable {
     this.tabs.forEach((t, i) => {
       const on = t.id === page;
       t.img
-        .setTexture(on ? UI.btn : UI.pillOff)
+        .setTint(on ? 0xffdf80 : 0xb0b0c8)
         .setPosition(this.X(x0 + i * (tw + gap)), this.Y(146))
-        .setDisplaySize(sd(tw), sd(m.tab.h));
+        .setDisplaySize(
+          sd(Math.min(tw, (m.tab.h * 512) / 192)),
+          sd(Math.min(m.tab.h, (tw * 192) / 512)),
+        );
       t.label
         .setPosition(this.X(x0 + i * (tw + gap)), this.Y(145))
         .setFontSize(Math.round(sd(26)))
-        .setColor(on ? THEME.ink : THEME.muted);
+        .setColor(on ? THEME.gold : THEME.muted);
     });
 
     this.content.removeAll(true);

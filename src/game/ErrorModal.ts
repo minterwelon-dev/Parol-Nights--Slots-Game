@@ -25,7 +25,7 @@ export class ErrorModal {
       .setOrigin(0.5);
     this.btn = scene.add.image(0, 0, UI.btn).setInteractive({ useHandCursor: true });
     this.label = scene.add
-      .text(0, 0, '', { fontFamily: THEME.fonts.numeric, color: '#3a1500' })
+      .text(0, 0, '', { fontFamily: THEME.fonts.numeric, color: THEME.gold })
       .setOrigin(0.5);
     this.root = scene.add.container(0, 0, [this.dim, this.panel, this.text, this.btn, this.label]);
     this.root.setDepth(DEPTH.ERROR_MODAL).setVisible(false);
@@ -56,7 +56,7 @@ export class ErrorModal {
     this.dim.setDisplaySize(this.scene.scale.width, this.scene.scale.height);
     this.panel.setPosition(cx, cy).setDisplaySize(sd(800), sd(450));
     this.text.setPosition(cx, cy - sd(60)).setFontSize(Math.round(sd(46)));
-    this.btn.setPosition(cx, cy + sd(120)).setDisplaySize(sd(360), sd(110));
+    this.btn.setPosition(cx, cy + sd(120)).setDisplaySize(sd((110 * 512) / 192), sd(110));
     this.label.setPosition(cx, cy + sd(120)).setFontSize(Math.round(sd(44)));
   }
 }
