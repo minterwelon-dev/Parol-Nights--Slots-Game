@@ -6,7 +6,7 @@ It records what is built, every decision that deviates from or extends the brief
 **Keep it current:** at the end of every completed step, update the relevant sections (status, decisions,
 file map, known issues, next steps) and the "Last updated" line. Phase checkboxes also live in `PROJECT_BRIEF.md`; tick them there too.
 
-_Last updated: 2026-10-13 — Phase 5 complete: live on GitHub Pages, gameplay video committed; Ship Checklist fully ticked. Optional next: ANIMATION_SPEC Step 9 / Phase 4 stretch._
+_Last updated: 2026-10-14 — Parol sway / H3 outer and DevTools resize corrections verified. Not deployed._
 
 ---
 
@@ -16,9 +16,85 @@ _Last updated: 2026-10-13 — Phase 5 complete: live on GitHub Pages, gameplay v
 - Never start a new phase without the user's go-ahead. All phases are done; the user skipped deploy and video.
 - Ask before changing the game spec. (The user approved the paytable rescale and the RTP tuning, as long as mechanics stay intact.)
 - Verify visually in **both landscape and portrait** after any UI change; the user reviews layouts closely (spacing, balance, text fitting the screen).
-- Nothing is committed to git yet (repo was `git init`-ed in Phase 0, zero commits). Commit only when the user asks.
+- The repository has published commits. Commit only when the user asks; on 2026-10-14 the user authorized committing and pushing the pending layered-animation and resize changes to `feat/audio-fx`.
 
 ## 2. Status by phase
+
+**Parol motion and viewport correction (2026-10-14):** user requested that H3's outer stop
+spinning and all parols retain their original sway alongside independent tassels. This supersedes
+the stationary bodies / rotating outer decisions in the historical Step 9 entries below.
+Generated a clean H3 outer with imagegen, preserving source and exact prompt in
+`source/layered/H3_outer_body.png` and `H3-outer-body-prompt.txt`; export metadata in
+`processing-next.json`. The new 30,400-byte WebP replaces the old outer at runtime (old source
+preserved, excluded from bundle). Four reused tassels attach independently. H3 inner rotation
+and core pulse remain; L1-L4/H1/H2/H3 sway and breathe again. Reduced motion now cancels any
+in-progress release blend immediately. No math, money, RGS or state-machine changes.
+
+Resize root cause: applying Phaser zoom before resizing left stale CSS dimensions on returning
+to DPR 1 (reproduced: 1280x720 canvas with 1170x2532 CSS). Resize now precedes zoom, and integer
+internal dimensions keep canvas, camera and layout aligned at fractional DPR. Regression script
+`node tools/check-resize.mjs` passes six successive viewport/DPR changes plus clearing emulation;
+evidence `_review/resize-before.json` and `_review/resize-check.json`.
+
+Verified build/typecheck, lint, existing checks and production debug/error-string gate.
+`node tools/check-layered.mjs` passes both orientations: fixed outer, body/tassel motion,
+win speed, reduced motion, blur/reuse, spin/skip, pool size, failed downloads, no exceptions.
+Mixed-grid 4x CPU/DPR 2 samples: 67.4 FPS portrait / 89.4 landscape. Screenshots in
+`_review/attachments-{portrait,landscape}.png`; report `_review/layered-check.json`.
+Production dist: 2,355,880 raw / 1,351,068 gzip bytes. Physical devices, feature-resume and
+deployment were not repeated; resize proof uses CDP emulation, not manual DevTools interaction.
+
+**Animation Step 9, tassels/SCATTER slice (2026-10-14):** implemented on the user's request to
+proceed. Generated six clean bodies (L1-L4, H1, H2), one shared gold tassel, an H2 beaded tassel,
+and a clean pandereta hoop plus separate cap. L4's delivered art has eight tassels despite the
+old asset description omitting them; all eight are supported. H3 retains the previous rotating
+outer frame with its attached tassels. Original flat symbols and previous five parts are preserved.
+New parts total 218,042 bytes; exact prompts, source PNGs, source hashes, dimensions and export
+operations live under `Assets/theme/parol-nights/source/layered/` (`generation-next.json`,
+the H2/L4 prompt text files, `processing-next.json`). Re-export: `node tools/export-layered.mjs --next`.
+
+`SYMBOL_PARTS` now supplies per-part texture, attachment position, dimensions and pivot on the
+512px reference canvas. Nine slots per SymbolView (largest = L4 body plus eight tassels), allocated
+once; timings in gameConfig.anim.symbols.tassel. Bodies stay still in idle; tassels swing +/-6 degrees
+over 1400ms with staggered phases. Seven SCATTER caps jingle independently in idle/win; whole-symbol
+landing/trigger/skip remains intact. H1 shine now targets the visible body layer. Reduced motion,
+dim, spin resets and whole-symbol fallback apply to attachments too. Deferred downloads are unique
+by texture name; the tiny cap is inlined by Vite. No outcome, money, state-machine or RGS changes.
+
+Verified: build/typecheck, lint, existing self-checks, production debug/error-string scan, and
+expanded `tools/check-layered.mjs`: both orientations, motion with still bodies, expected part
+counts, win jiggle, trigger finish/skip, reduced motion, real spin/skip to Idle, unchanged pool
+size, and failed tassel/beaded-tassel/cap downloads falling back to complete flat symbols.
+Screenshots: `_review/attachments-{portrait,landscape}.png`; report `_review/layered-check.json`.
+Attachment-heavy mixed grid at DPR 2 / 4x CPU: 72.2 FPS portrait, 82.1 landscape (short desktop
+headless samples, not physical mobile certification). Physical devices, feature-resume and
+deployment were not repeated. Spine remains optional.
+
+**Animation Step 9, H3/WILD slice (2026-10-14):** user requested implementation using the
+imagegen skill. Five transparent layers generated with the built-in image tool from the approved
+symbol references. Original flat artwork is untouched. Sources and exact prompts are in
+`Assets/theme/parol-nights/source/layered/`; 512x512 WebPs in `parts/` total 150,970 bytes.
+These are regenerated interpretations, not pixel-identical decompositions. Native alpha preserved;
+uniform fit/padding and WebP export recorded in `processing.json`. Re-export using
+`node tools/export-layered.mjs` (local headless Chrome, muted).
+
+Parts load deferred. Every pooled SymbolView owns three reusable layer slots; no per-spin objects
+or layer tweens. H3 inner -10 / outer +6 degrees per second, x3 during wins; WILD rays +20,
+x2 during wins. Cores pulse independently, with H3 parameters in gameConfig.anim.symbols.h3.
+Layers inherit whole-symbol win/land scale and dim. Reduced motion restores a static pose;
+spin resets poses and uses the existing flat blur. Missing any layer retains that symbol's
+complete flat image; WILD's procedural rays remain the fallback. No outcome/state/RGS changes.
+
+Verified: build/typecheck, lint, existing self-checks, production debug/error-string gate;
+`node tools/check-layered.mjs` with `npm run dev` checks portrait/landscape, opposite rotation,
+win speed, reduced motion, blur/reuse reset, actual spin/skip returning to Idle, unchanged pool
+size and one failed-layer download falling back while WILD remains layered. No runtime exceptions.
+Screenshots/report: `_review/layered-{portrait,landscape}.png`, `_review/layered-check.json`.
+4x CPU / DPR 2, five H3 + five WILD: portrait 104.6 FPS vs flat 110.2; landscape 118.8 vs flat
+116.6. An initial 40.3 FPS sample failed; final comparison passed. Desktop headless measurements,
+not physical-device proof. Production total: 2,150,785 raw / 1,151,006 gzip bytes.
+Remaining optional slices: independent tassels on other symbols, individual SCATTER caps, Spine.
+Physical Android/iOS, feature-resume regression and deployment were not repeated in this slice.
 
 Typography Step 3: user authorized; implemented Cinzel Decorative 700 title plus
 Baloo 2 400/700 UI/numbers, both Fontsource 5.3.0 / SIL OFL 1.1. Only three Latin

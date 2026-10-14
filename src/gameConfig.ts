@@ -234,7 +234,13 @@ export const gameConfig = {
       h1ShineEveryMs: 4000,
       coinShineEveryMs: 3000,
       h2: { tint: 0x8ff5e6, shimmerMin: 0.1, shimmerMax: 0.25, shimmerHz: 1.5 },
-      h3: { idleGlow: 0.25 },
+      h3: {
+        idleGlow: 0.25,
+        innerDegPerSec: -10,
+        winSpeed: 3,
+        corePulse: 0.06,
+        corePulseMs: 1200,
+      },
       wild: {
         raysDegPerSec: 20,
         corePulse: 0.06,
@@ -244,6 +250,7 @@ export const gameConfig = {
         ringTo: 2.5,
         sparkEveryMs: 160,
       },
+      tassel: { swayDeg: 6, swayMs: 1400, staggerMs: 80 },
       scatter: {
         jingleDeg: 4,
         jingleEveryMs: 3000,

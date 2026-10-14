@@ -1,0 +1,47 @@
+{
+  "tool": "Built-in image_gen, imagegen skill",
+  "date": "2026-10-14",
+  "transparent_background": true,
+  "jobs": [
+    {
+      "name": "L1_body",
+      "id": "L1",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove only all dangling tassels from the five star tips. Keep every gold tip knob and the full emerald star body unchanged. Reconstruct clean complete tip edges. Body centered at (50%,47%) of original canvas, same scale and placement as reference. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "L2_body",
+      "id": "L2",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove only the bottom dangling tassel. Keep the bottom gold attachment knob, the sapphire round body and top finial unchanged. Keep the original size and placement, including transparent lower space. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "L3_body",
+      "id": "L3",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove only the bottom dangling tassel. Keep the bottom gold attachment knob and full amethyst diamond body unchanged. Keep original size and placement and transparent lower space. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "H1_body",
+      "id": "H1",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove only ALL hanging tassels, including small top tassel, from the five star tips. Keep gold tip knobs and the ornate red star body with gold filigree unchanged. Reconstruct clean tip edges, keep original body size and placement. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "H2_body",
+      "id": "H2",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove only ALL dangling beaded tassels from the five lower and side attachments of the hexagonal capiz lantern. Keep the pearl teal hexagonal body and gold attachment knobs and top finial unchanged. Keep exact original body placement and size. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "tassel",
+      "id": "L1",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Isolate ONE simple golden silky tassel from the bottom of the reference. Single tassel with small spherical gold attachment bead on top, narrow wrapped neck and flaring golden ribbon strands hanging straight down. No lantern, no other object. Vertically centered, symmetric, full silhouette including attachment bead, large transparent padding. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "pandereta_hoop",
+      "id": "SCATTER",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Remove ALL seven metallic bottle caps and their gold hooks from the hoop. Reconstruct the smooth complete continuous round red-and-gold wrapped wooden hoop behind the removed caps. Keep the festive red/gold bow and tails exactly as reference. Transparent hole inside hoop. Preserve original hoop size and placement. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    },
+    {
+      "name": "pandereta_cap",
+      "id": "SCATTER",
+      "prompt": "Use case: precise-object-edit. Input image is the edit target from the approved Parol Nights artwork. Create one separate animation layer. Isolate ONE round golden flattened bottle cap with a scalloped metal edge and one short gold hook at its top for attaching it to the hoop. Front-facing circular cap, polished golden sheen and navy contour matching reference. No hoop, ribbon, other caps or other objects. Centered isolated cap with transparent padding. Preserve the glossy 2D slot illustration style, gold/navy outlines, color palette and highlights. Genuine transparent background. No text, added glow, shadows, sheet, checkerboard or extra objects."
+    }
+  ]
+}

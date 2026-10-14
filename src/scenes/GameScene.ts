@@ -167,6 +167,7 @@ export class GameScene extends Phaser.Scene {
     this.load.on(Phaser.Loader.Events.PROGRESS, (p: number) => this.hud.setLoading(p));
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
       (this.scene.get('Boot') as BootScene).ensureArtFallbacks(art);
+      this.reels?.refreshParts();
       this.background?.relayout(layout);
       this.ready = true;
       this.sfx.init();

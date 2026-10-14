@@ -93,7 +93,7 @@ Tune values here only.
 | File | Size | Purpose |
 |---|---|---|
 | `parts/tassel.webp` | 128x256 | Reusable tassel, rotated around its top pivot for L/H symbols that carry tassels |
-| `parts/H3_outer.webp`, `H3_inner.webp`, `H3_core.webp` | 512x512 | H3 split into three layers that rotate at different speeds |
+| `parts/H3_outer_body.webp`, `H3_inner.webp`, `H3_core.webp` | 512x512 | H3 outer frame follows whole-symbol sway; inner rotates, core pulses; four separate tassels |
 | `parts/WILD_core.webp`, `WILD_rays.webp` | 512x512 | Core pulses, rays rotate behind it |
 | `parts/pandereta_hoop.webp` | 512x512 | Hoop without caps |
 | `parts/pandereta_cap.webp` | 64x64 | Single bottle cap, placed around the hoop in code and jingled |
@@ -125,7 +125,7 @@ States: **Idle**, **Land**, **Anticipation**, **Win**, **Dim**, **Trigger**. Idl
 | Win | Pop `1 -> 1.18`, then loop breathe `1.0 <-> 1.08`; glow sprite alpha `0.3 -> 0.8`; 3 sparkles per cycle | pop 260 ms `Back.easeOut`, loop 500 ms |
 | Dim (non-winning) | Alpha to 0.35, no motion | 150 ms |
 
-Level 1 upgrade: swing `parts/tassel` independently (angle +/- 6 degrees, 1400 ms, staggered by index) and keep the body still.
+Level 1 upgrade: swing `parts/tassel` independently (angle +/- 6 degrees, 1400 ms, staggered by index), preserving the body's original sway and breathe.
 
 ### 7.2 Symbol specifics
 
@@ -134,7 +134,7 @@ Level 1 upgrade: swing `parts/tassel` independently (angle +/- 6 degrees, 1400 m
 | **L1 to L4** | None beyond shared | Faster sway (x1.6) during win | Keep subtle so high symbols stand out |
 | **H1** (red and gold) | Shine sweep every 4 s using a masked white sweep sprite | Shine sweep plays twice; gold sparkle burst | Only one H1 shine at a time |
 | **H2** (capiz shell) | Shimmer: overlay of pearl highlight, alpha jitter 0.1 to 0.25 at <= 2 Hz | Shimmer brightens, teal glow pulse | |
-| **H3** (grand) | Level 0: slow breathe + glow. Level 1: layers rotate (outer +6 deg/s, inner -10 deg/s, core pulse) | Layers x3 speed, rays flash once, sparkle burst x2 | The most spectacular symbol |
+| **H3** (grand) | Slow sway + breathe + glow. Level 1: fixed outer, inner -10 deg/s, core pulse, independent tassels | Inner x3 speed, rays flash once, sparkle burst x2 | The most spectacular symbol |
 | **WILD** | Rays rotate 20 deg/s behind core, core pulses `1 <-> 1.06` | **On land:** expanding ring shockwave + sparkle burst. During win: rays x2 speed, continuous sparkles | Level 0: rotate a baked ray sprite behind the symbol |
 | **SCATTER** (pandereta) | Gentle jingle: rotate +/- 4 degrees every 3 s | Shake +/- 8 degrees, 3 cycles, 40 ms apart (Level 1: caps jiggle individually) | |
 | **COIN** (aguinaldo) | Slow shine sweep every 3 s | See Hold & Win (section 9) | Value text drawn in code, pops in on land |
@@ -330,3 +330,10 @@ Use `sd()`, `sx()`, `sy()` for all sizes and positions as required by `AGENTS.md
 7. Ambient background and HUD
 8. Polish pass: tune values, test on a throttled mobile viewport
 9. Optional: Level 1 layered parts, Spine experiment
+
+Implementation 2026-10-14: H3 and WILD Level 1 complete; L1-L4/H1/H2 have independent tassels,
+and SCATTER has seven separately animated caps. All use pooled views, reduced motion and complete
+flat-symbol fallback. H3's outer frame does not spin; its body sways with four independent tassels.
+L1-L4/H1/H2 also retain whole-body sway. Spine remains optional.
+Runtime tuning lives in `gameConfig.anim`; see IMPLEMENTATION_STATUS.md
+for verification and asset provenance.

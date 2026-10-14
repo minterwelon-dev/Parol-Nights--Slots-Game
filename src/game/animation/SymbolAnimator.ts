@@ -218,6 +218,7 @@ export class SymbolAnimator {
       if (!this.live[r]) continue;
       const v = this.view(r, i % ROWS);
       const id = v.id;
+      const attachments = v.layered && id !== 'H3' && id !== 'WILD';
       let s = 1;
       let sx = 1;
       let angle = 0;
@@ -225,6 +226,8 @@ export class SymbolAnimator {
       let glowK = 1;
       let tint: number = S.glowTint;
       let rayRate = 0;
+      let partPulse = 0;
+      let partSpeed = 0;
       let state = 0;
 
       // dim fade
@@ -272,30 +275,36 @@ export class SymbolAnimator {
             }
           }
           if (LOW.has(id)) angle = this.sway(i, A.idle.swayMs / LOW_WIN_SWAY);
-          if (id === 'SCATTER') angle = this.scatterShake(t);
+          if (id === 'SCATTER' && !attachments) angle = this.scatterShake(t);
           glowA = 0.3 + 0.5 * (1 - k);
           glowK = 1.15 + 0.1 * (1 - k);
           rayRate = 2;
+          partSpeed = id === 'H3' ? S.h3.winSpeed : 2;
+          partPulse = 1 - k;
         }
       } else if (this.teases(id)) {
         state = 2;
         const k = 0.5 - 0.5 * Math.cos((2 * Math.PI * this.tease.t) / A.tease.pulseMs);
         if (!reduced) s = 1 + (A.tease.pulseScale - 1) * k;
         glowA = reduced ? STATIC_GLOW : 0.4 + 0.4 * k;
-      } else if (this.idle && !reduced) {
+      } else if (this.idle && !reduced && this.alphaTo[i] === 1) {
         // idle motion fades in, so symbols never jump into mid-sway after a spin
         const w = (this.idleW[i] = Math.min(1, this.idleW[i] + dt / A.idle.blendInMs));
         const ease = w * w * (3 - 2 * w);
         const b = 0.5 - 0.5 * Math.cos((Math.PI * this.phase(i)) / A.idle.breatheMs);
-        if (id === 'WILD') {
-          const p = 0.5 - 0.5 * Math.cos((2 * Math.PI * this.phase(i)) / S.wild.corePulseMs);
-          s = 1 + S.wild.corePulse * p * ease;
+        if (id === 'WILD' || (id === 'H3' && v.layered)) {
+          const period = id === 'H3' ? S.h3.corePulseMs : S.wild.corePulseMs;
+          const p = 0.5 - 0.5 * Math.cos((2 * Math.PI * this.phase(i)) / period);
+          if (!v.layered) s = 1 + S.wild.corePulse * p * ease;
+          partSpeed = ease;
+          partPulse = p * ease;
           rayRate = ease;
-        } else {
+        }
+        if (id !== 'WILD' && (id !== 'SCATTER' || !attachments)) {
           s = 1 + A.idle.breatheScale * b * ease;
           angle = this.sway(i, A.idle.swayMs) * ease;
         }
-        if (id === 'SCATTER') angle += this.jingle(i) * ease;
+        if (id === 'SCATTER' && !attachments) angle += this.jingle(i) * ease;
         if (id === 'H2') {
           const f = 0.5 + 0.5 * Math.sin((2 * Math.PI * S.h2.shimmerHz * this.clock) / 1000);
           glowA = S.h2.shimmerMin + (S.h2.shimmerMax - S.h2.shimmerMin) * f;
@@ -313,6 +322,7 @@ export class SymbolAnimator {
         this.relA[i] = this.lastA[i];
         this.state[i] = state;
       }
+      if (reduced) this.relT[i] = -1;
       if (this.relT[i] >= 0) {
         const k = Math.min((this.relT[i] += dt) / A.idle.releaseMs, 1);
         const e = 1 - (1 - k) * (1 - k) * (1 - k);
@@ -344,6 +354,19 @@ export class SymbolAnimator {
 
       v.root.setScale(s * sx, s * sy).setAlpha(this.alpha[i]);
       v.pivot.setAngle(angle);
+      v.animateParts(dt, partSpeed, partPulse, reduced);
+      const attachmentWeight = reduced
+        ? 0
+        : this.win[i]
+          ? 1
+          : this.idle && state === 0 && this.alphaTo[i] === 1
+            ? this.idleW[i]
+            : 0;
+      v.animateAttachments(
+        this.win[i] ? this.winT[i] : this.phase(i),
+        attachmentWeight,
+        this.win[i],
+      );
 
       const glow = this.glows[i];
       if (glowA > 0) {
@@ -352,7 +375,7 @@ export class SymbolAnimator {
       } else glow.setVisible(false);
 
       const ray = this.rays[i];
-      if (id === 'WILD') {
+      if (id === 'WILD' && !v.layered) {
         if (!reduced) this.rayAngle[i] += (rayRate * S.wild.raysDegPerSec * dt) / 1000;
         ray
           .setVisible(true)
@@ -431,7 +454,7 @@ export class SymbolAnimator {
   /** preFX shine for `sweeps` passes, within the post-FX budget (WebGL only). */
   private startShine(i: number, sweeps: number) {
     if (this.shines[i] || this.anim.reduced || !this.anim.acquireFx()) return;
-    const img = this.view(Math.floor(i / ROWS), i % ROWS).img;
+    const img = this.view(Math.floor(i / ROWS), i % ROWS).effectImage;
     const fx = img.preFX?.addShine(S.shineSpeed, 0.5, 3, false);
     if (!fx) {
       this.anim.releaseFx();
@@ -444,7 +467,7 @@ export class SymbolAnimator {
   private stopShine(i: number) {
     const fx = this.shines[i];
     if (!fx) return;
-    this.view(Math.floor(i / ROWS), i % ROWS).img.preFX?.remove(fx);
+    this.view(Math.floor(i / ROWS), i % ROWS).effectImage.preFX?.remove(fx);
     this.shines[i] = undefined;
     this.anim.releaseFx();
   }
@@ -474,5 +497,6 @@ export class SymbolAnimator {
     const v = this.view(Math.floor(i / ROWS), i % ROWS);
     v.root.setScale(1).setAlpha(1);
     v.pivot.setAngle(0);
+    v.animateParts(0, 0, 0, true);
   }
 }

@@ -122,6 +122,13 @@ export class Reels {
     this.symbols.reset();
   }
 
+  /** Deferred layer textures are ready; refresh the existing symbol pool. */
+  refreshParts() {
+    for (let r = 0; r < REELS; r++) {
+      for (let i = 0; i < SLOTS; i++) this.cols[r][i].refreshParts();
+    }
+  }
+
   /** Idle sway / breathe while the state machine sits in Idle. */
   setIdle(on: boolean) {
     this.symbols.setIdle(on);

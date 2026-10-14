@@ -167,18 +167,17 @@ grep -o "forcePicker\|__rgs\|__game\|Reset session\|console.error\|force=" dist/
 
 ## Bundle size
 
-Production build, 2026-10-13 (`npm run build`), current working tree including art-audit
-changes, generated spin/stop controls and the ANIMATION_SPEC.md implementation:
+Production build, 2026-10-14 (`npm run build`), including layered H3/WILD, tassels and SCATTER caps:
 
 | File | Raw | Gzip |
 |---|---|---|
-| `assets/index-*.js` (game + Phaser 3.90; includes two small control glyphs) | 1,325.0 KB | 364.0 KB |
+| `assets/index-*.js` (game + Phaser 3.90; includes small control glyphs and a cap) | 1,334.2 KB | 368.5 KB |
 | `index.html` | 0.7 KB | 0.5 KB |
 | 3 Latin WOFF2 fonts | 53.8 KB | 53.9 KB |
-| External theme WebPs (food icons now load deferred for the feast table) | 539.0 KB | 537.5 KB |
+| External theme WebPs (food icons and symbol parts load deferred) | 888.7 KB | 883.4 KB |
 | Font license notices | 9.0 KB | 4.0 KB |
 | 6 MP3 SFX (deferred; 2 more under 4 KB are inlined in the JS) | 69.2 KB | (already compressed) |
-| **Total `dist/`** | **1,996.7 KB** | **1,000.7 KB** |
+| **Total `dist/`** | **2,355.9 KB** | **1,351.1 KB** |
 
 Measured with Node `zlib.gzipSync` (decimal KB; total gzip is the sum of individually compressed
 files). Critical source art is 439.2 KB landscape / 438.9 KB portrait; the opposite background,
@@ -197,6 +196,34 @@ startup timeout and late-load refresh. Audio loads after the first screen; spin
 shows "LOADING n%" until it is ready.
 
 ## Performance
+
+Tassel/SCATTER extension (2026-10-14): a mixed grid covering all layered symbols measured
+**67.4 FPS portrait / 89.4 FPS landscape**, DPR 2 and 4x CPU throttle in headless desktop Chrome
+after restoring whole-parol sway. Body/tassel motion, fixed H3 outer, reduced motion, skipped
+triggers, pool reuse and failed-part fallback passed.
+Ten new assets add 218.0 KB (cap inlined by Vite); re-export with
+`node tools/export-layered.mjs --next`. Source PNGs, exact prompts and export records are in
+`Assets/theme/parol-nights/source/layered/`. Screenshots: `_review/attachments-{portrait,landscape}.png`.
+Physical Android/iOS testing remains outstanding.
+
+Layered H3/WILD check (2026-10-14, headless Chrome, DPR 2, 4x CPU throttle, 2.5-second rendered-frame
+samples with five H3 and five WILD): portrait **104.6 FPS** (flat control 110.2), landscape **118.8**
+(flat 116.6). An initial 40.3 FPS sample did not repeat in the final comparison; these short desktop
+samples do not establish physical mobile performance. Run `npm run dev` then
+`node tools/check-layered.mjs` for the assertion checks and local screenshots.
+
+H3/WILD parts were generated using the built-in imagegen tool; exact prompts and sources:
+`Assets/theme/parol-nights/source/layered/`. Five 512px WebPs add 151.0 KB deferred art.
+H3 rotates its inner layer; its outer follows whole-body sway without spinning. WILD rotates
+rays behind a pulsing core. Reduced
+motion is static; failed layer loads retain the flat symbol. Re-export with
+`node tools/export-layered.mjs` (Chrome on Windows). The subsequent extension above adds tassels
+to L1-L4/H1/H2 and individual SCATTER caps. The H3 correction adds a clean 30.4 KB outer and
+four reused independent tassels, replacing the old outer at runtime.
+
+Viewport regression: `node tools/check-resize.mjs` verifies portrait/landscape, DPR 1/2/2.625/3,
+and returning from emulation to desktop. Canvas CSS, internal pixels and camera dimensions
+remain aligned. Evidence: `_review/resize-check.json` (CDP emulation; physical devices untested).
 
 Animation pass (ANIMATION_SPEC.md Step 8; 412 x 915 and 915 x 412 at DPR 2.625, 4x CPU throttle, full
 motion, rAF frame probe, dev build):

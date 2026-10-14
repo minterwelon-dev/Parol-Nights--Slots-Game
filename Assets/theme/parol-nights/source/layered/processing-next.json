@@ -1,0 +1,178 @@
+[
+  {
+    "name": "H3_outer_body",
+    "file": "parts/H3_outer_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 30400,
+    "sourceSha256": "4b7386d5838587789111259d8844569270e6f17323a04aaa77f0a0b201029275",
+    "bounds": [
+      188,
+      109,
+      1066,
+      953
+    ],
+    "scale": 0.41002277904328016,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 48; no repainting"
+  },
+  {
+    "name": "L1_body",
+    "file": "parts/L1_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 30118,
+    "sourceSha256": "f9f6767d4c75ea0ba2a10fe0ca141bc2ef68c2babeebd22c6f1ea80a0bdf6ee5",
+    "bounds": [
+      108,
+      72,
+      1146,
+      982
+    ],
+    "scale": 0.3853564547206166,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 45; no repainting"
+  },
+  {
+    "name": "L2_body",
+    "file": "parts/L2_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 29570,
+    "sourceSha256": "cdcfcf06ad94d72c18cd77dc7e1eb409773b28616fd426b5528e169ee7daf28b",
+    "bounds": [
+      227,
+      87,
+      1026,
+      995
+    ],
+    "scale": 0.3964757709251101,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 40; no repainting"
+  },
+  {
+    "name": "L3_body",
+    "file": "parts/L3_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 25102,
+    "sourceSha256": "18f4b61e1d4be0f9ff3bea495ebda44a2e65e48f4dbb9897c8c6cc66efaa29a4",
+    "bounds": [
+      189,
+      91,
+      1065,
+      983
+    ],
+    "scale": 0.40358744394618834,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 40; no repainting"
+  },
+  {
+    "name": "L4_body",
+    "file": "parts/L4_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 30972,
+    "sourceSha256": "407414104134fece45ed6c3324fc4ec0f12d214e7d783ce747882dbace578c8d",
+    "bounds": [
+      114,
+      88,
+      1140,
+      1100
+    ],
+    "scale": 0.37037037037037035,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 40; no repainting"
+  },
+  {
+    "name": "H1_body",
+    "file": "parts/H1_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 26110,
+    "sourceSha256": "cd37a42ddd74387c18d79b66d1da182b8525dbab03c2044a73d6acf576ca458d",
+    "bounds": [
+      98,
+      76,
+      1155,
+      1007
+    ],
+    "scale": 0.33112582781456956,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 45; no repainting"
+  },
+  {
+    "name": "H2_body",
+    "file": "parts/H2_body.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 29872,
+    "sourceSha256": "ce98dba2a704d903520b0e77a68abc1c2768a96067543e0dfb7c243fc85f89ed",
+    "bounds": [
+      161,
+      65,
+      1093,
+      1058
+    ],
+    "scale": 0.35246727089627394,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 40; no repainting"
+  },
+  {
+    "name": "pandereta_hoop",
+    "file": "parts/pandereta_hoop.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 30146,
+    "sourceSha256": "32b1f72f6fc50a96bebc4e3fda2eca3df43f5c43d43bf73c0a8ea49c488b515d",
+    "bounds": [
+      193,
+      137,
+      1059,
+      1162
+    ],
+    "scale": 0.4097560975609756,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top 46; no repainting"
+  },
+  {
+    "name": "tassel",
+    "file": "parts/tassel.webp",
+    "width": 128,
+    "height": 256,
+    "bytes": 4222,
+    "sourceSha256": "c5b4f5dbc0d3aa087f8bfccd8ebedd91ff232a74e71a3cadcb90aa3e5b2c0eb2",
+    "bounds": [
+      344,
+      242,
+      908,
+      991
+    ],
+    "scale": 0.1602136181575434,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top -1; no repainting"
+  },
+  {
+    "name": "H2_tassel",
+    "file": "parts/H2_tassel.webp",
+    "width": 128,
+    "height": 256,
+    "bytes": 9568,
+    "sourceSha256": "801b0a9bf2e275de0a3d330042b041d2c409a28d8a0e6b14ac7f22694652d967",
+    "bounds": [
+      450,
+      138,
+      804,
+      1102
+    ],
+    "scale": 0.23858921161825727,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top -1; no repainting"
+  },
+  {
+    "name": "pandereta_cap",
+    "file": "parts/pandereta_cap.webp",
+    "width": 64,
+    "height": 64,
+    "bytes": 2362,
+    "sourceSha256": "02482c204fec926506b5a361879d3bf651e7ffefdc9d8253bdd6881f61c4111f",
+    "bounds": [
+      207,
+      126,
+      1047,
+      1102
+    ],
+    "scale": 0.05737704918032787,
+    "processing": "Uniform resize, native alpha preserved, WebP quality 0.76; top -1; no repainting"
+  }
+]

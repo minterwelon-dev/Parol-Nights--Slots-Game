@@ -392,3 +392,36 @@ Exact prompt:
 ```text
 Polished 2D mobile slot-game icon in a stylized vector-illustration look, soft gradients, subtle glossy highlights, clean thin dark-navy outline, warm glow radiating from inside. Filipino Christmas parol aesthetic: bamboo frame, colored capiz-shell or cellophane panels, tassels. Front view, perfectly centered, symmetrical, strong readable silhouette, no cast shadow, no ground. No text, no letters, no numbers, no watermark, no people, no faces, no religious symbols. The subject sits on a genuinely transparent background with no gradient, no vignette, no texture (native alpha, not a drawn checkerboard). A red aguinaldo gift envelope with a gold ornamental border and a golden coin partly emerging from the top. No text on the envelope. Front-on envelope silhouette; the coin has only simple non-text ornament, no face or lettering. Single isolated icon on a square canvas, whole subject including tassels fully visible with comfortable margins, longest side about 85% of canvas. Soft top-front light and warm internal light, crisp thin navy contours, clean readable at 96x96. Palette: navy #0B1033, gold #FFC94A, amber #FF9F1C, red #E63946, emerald #1FB981, pearl #FFF6E0. No brand elements, no existing game art, no detached decorative objects. Use case: stylized-concept; asset type: transparent game symbol. Input image is a style reference only: match the illustration technique, glossy gold material, red/gold palette and thin navy outline; change subject entirely to one festive red gift envelope with a gold ornamental border and a golden coin partly emerging from the top. Envelope must have strong rectangular silhouette. No star lantern and no tassels on this envelope. No monetary numbers, letters, text or face on coin.
 ```
+
+## Level 1 H3 / WILD layers (2026-10-14)
+
+Generated with the built-in OpenAI image_gen tool using the imagegen skill; one attempt per layer.
+Edit references: approved `symbols/H3.webp` and `symbols/WILD.webp`. Sources, exact tool prompts,
+and export measurements: `source/layered/generation.json` and `source/layered/processing.json`.
+Deliverables: `parts/H3_outer.webp`, `parts/H3_inner.webp`, `parts/H3_core.webp`,
+`parts/WILD_rays.webp`, `parts/WILD_core.webp`. All 512x512, native alpha, uniform resizing
+and transparent padding, browser WebP quality 0.76. No procedural replacement art.
+Generated interpretations retain the reference style but are not pixel-identical separations.
+
+## Level 1 tassels and SCATTER caps (2026-10-14)
+
+Built-in OpenAI image_gen via the imagegen skill, one generation per asset. Six edited bodies
+use the matching approved L1-L4/H1/H2 flat symbol as reference; the gold tassel uses L1, the beaded
+tassel uses H2, and both pandereta pieces use SCATTER. Exact prompts: `source/layered/generation-next.json`,
+`source/layered/H2-tassel-prompt.txt`, `source/layered/L4-body-prompt.txt`. PNG sources are adjacent.
+Generated interpretations, not pixel-identical decompositions. Original flat assets preserved.
+
+Exports: six `parts/*_body.webp` and `parts/pandereta_hoop.webp` at 512x512, `parts/tassel.webp`
+and `parts/H2_tassel.webp` at 128x256, `parts/pandereta_cap.webp` at 64x64. Uniform scale and padding,
+native alpha preserved, browser WebP quality 0.76. All ten below 40 KB, total 218,042 bytes.
+`source/layered/processing-next.json` is the per-file manifest with dimensions, hashes and operations.
+Reproduce export with `node tools/export-layered.mjs --next`. The extra H2 tassel preserves its
+beaded identity; L4 was included because the delivered symbol visibly carries eight tassels.
+Runtime poses reviewed at reel size in portrait/landscape; motion and fallback checks passed.
+
+H3 correction (2026-10-14): generated `source/layered/H3_outer_body.png` with built-in
+OpenAI image_gen, using `parts/H3_outer.webp` as the edit reference to remove the four dangling
+tassels. Exact prompt: `source/layered/H3-outer-body-prompt.txt`; hash and uniform alpha-preserving
+WebP export: `source/layered/processing-next.json`. `parts/H3_outer_body.webp` is 512x512,
+30,400 bytes. Runtime reuses four shared tassels; the original outer asset is preserved but
+excluded from the production asset glob.

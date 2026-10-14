@@ -30,9 +30,12 @@ function readViewport(): boolean {
 function bindResponsiveResize(game: Phaser.Game) {
   const apply = () => {
     if (!readViewport()) return;
+    const width = Math.round(vw * dpr);
+    const height = Math.round(vh * dpr);
+    game.scale.resize(width, height);
+    // Apply zoom after resize: at zoom 1 Phaser.resize leaves the previous CSS size intact.
     game.scale.setZoom(1 / dpr);
-    game.scale.resize(vw * dpr, vh * dpr);
-    game.events.emit(RELAYOUT, updateLayout(vw * dpr, vh * dpr));
+    game.events.emit(RELAYOUT, updateLayout(width, height));
   };
   let raf = 0;
   const schedule = () => {
@@ -57,7 +60,9 @@ function start() {
   document.body.appendChild(parent);
 
   readViewport();
-  updateLayout(vw * dpr, vh * dpr);
+  const width = Math.round(vw * dpr);
+  const height = Math.round(vh * dpr);
+  updateLayout(width, height);
 
   const rgs = new MockRGS({
     latency: gameConfig.rgs.latency,
@@ -71,7 +76,7 @@ function start() {
     type: Phaser.AUTO,
     transparent: true,
     parent,
-    scale: { mode: Phaser.Scale.NONE, width: vw * dpr, height: vh * dpr, zoom: 1 / dpr },
+    scale: { mode: Phaser.Scale.NONE, width, height, zoom: 1 / dpr },
     render: { antialias: true, pixelArt: false },
     scene: [new BootScene(), new GameScene(rgs)],
   });

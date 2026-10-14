@@ -171,3 +171,25 @@ If a file exceeds its cap, lower quality (not below 70), then reduce dimensions 
 - Do not use or imitate existing slot or casino game art, characters or titles.
 - Keep the content suitable for a general audience.
 - Stop after each stage and summarize what you generated, what failed, and what you need from me.
+
+## Level 1 animation layers (H3 / WILD slice, 2026-10-14)
+
+Implemented from ANIMATION_SPEC section 5 using the approved H3/WILD images as edit references.
+- `parts/H3_outer.webp`, `H3_inner.webp`, `H3_core.webp`: outer frame/fringe, stained-glass medallion, luminous core.
+- `parts/WILD_rays.webp`, `WILD_core.webp`: rays/rim and central disc.
+
+All exports use a 512x512 transparent canvas; align centers and leave rotation clearance.
+Reconstruct concealed artwork instead of leaving accidental holes. Preserve original flat symbols
+for spin blur and failed-download fallback. Exact generation prompts and original PNGs are under
+`Assets/theme/parol-nights/source/layered/`. Re-export: `node tools/export-layered.mjs`.
+Independent tassels and SCATTER caps are a later slice. Runtime integration was explicitly
+requested for this slice and is implemented; the original art-only stages above remain historical.
+
+### Completed next slice: tassels and SCATTER (2026-10-14)
+
+User authorized implementation of the next step. Generated clean L1-L4/H1/H2 bodies, shared gold
+tassel, H2 beaded tassel (preserves the delivered detail), clean pandereta hoop and separate cap.
+L4's delivered art has eight tassels, so it is included despite its older description above.
+Exact prompts, PNGs and per-file export manifest: `Assets/theme/parol-nights/source/layered/`.
+Export: `node tools/export-layered.mjs --next`. Runtime and browser checks are complete;
+H3 retains its previous rotating frame/tassels. Spine remains optional.

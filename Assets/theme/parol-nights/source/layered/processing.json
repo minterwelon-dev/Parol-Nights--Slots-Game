@@ -1,0 +1,82 @@
+[
+  {
+    "name": "WILD_rays",
+    "file": "parts/WILD_rays.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 53900,
+    "sourceSha256": "d299e0262be2c7a49841b3e1063b1a6ca9572ecb8ac6db4a9291ef0524562487",
+    "bounds": [
+      40,
+      41,
+      1216,
+      1212
+    ],
+    "scale": 0.3673469387755102,
+    "processing": "Uniform resize centered on 512 canvas, native alpha preserved, WebP quality 0.76; no repainting"
+  },
+  {
+    "name": "WILD_core",
+    "file": "parts/WILD_core.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 10718,
+    "sourceSha256": "1860d5f91efa7cdc3e5a8615738da34d4eb518502cac1ecda664ea4e77a632da",
+    "bounds": [
+      331,
+      325,
+      923,
+      912
+    ],
+    "scale": 0.2939189189189189,
+    "processing": "Uniform resize centered on 512 canvas, native alpha preserved, WebP quality 0.76; no repainting"
+  },
+  {
+    "name": "H3_outer",
+    "file": "parts/H3_outer.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 47284,
+    "sourceSha256": "10239a4e7c45edd6fbbb1282227ab4296dd5f31339001922da6ecd947d290fb4",
+    "bounds": [
+      73,
+      52,
+      1180,
+      1198
+    ],
+    "scale": 0.36649214659685864,
+    "processing": "Uniform resize centered on 512 canvas, native alpha preserved, WebP quality 0.76; no repainting"
+  },
+  {
+    "name": "H3_inner",
+    "file": "parts/H3_inner.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 31274,
+    "sourceSha256": "1d9a27d9bf9c083b42f1210b60acc1e51b10a870cd20c1de3e598947f2906f6f",
+    "bounds": [
+      156,
+      98,
+      1098,
+      1122
+    ],
+    "scale": 0.318359375,
+    "processing": "Uniform resize centered on 512 canvas, native alpha preserved, WebP quality 0.76; no repainting"
+  },
+  {
+    "name": "H3_core",
+    "file": "parts/H3_core.webp",
+    "width": 512,
+    "height": 512,
+    "bytes": 7794,
+    "sourceSha256": "24d1156c9d7bda9ee7048820cc23345fc32efa3ba80a1d4def188fa48cb6e929",
+    "bounds": [
+      342,
+      324,
+      910,
+      905
+    ],
+    "scale": 0.23752151462994836,
+    "processing": "Uniform resize centered on 512 canvas, native alpha preserved, WebP quality 0.76; no repainting"
+  }
+]

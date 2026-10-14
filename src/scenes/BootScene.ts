@@ -163,6 +163,8 @@ export class BootScene extends Phaser.Scene {
     for (const { key } of items) {
       if (this.textures.exists(key)) continue;
       warnMissing(key);
+      // A missing part keeps the complete flat symbol; never substitute a panel for a layer.
+      if (key.startsWith('part_')) continue;
       const frame = key === ART.frame.key;
       const logo = key === ART.logo.key;
       const w = frame ? 1700 : logo ? 768 : 32;
